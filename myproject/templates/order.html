@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказ №{{ data.id }}{% endblock %}
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/order.css' %}">
+  <!-- Left Column / Headphones Image --></pre>
+  <div class="left-column"><img src={{img}} alt="Image" /> </div>
+  <pre> 
+   
+    <!-- Right Column --></pre>
+  <div class="right-column"><!-- Product Description -->
+  <div class="product-description">
+  <h1>{{title}}</h1>
+  <p> Some other stuff</p>
+  <ul>
+   <li>just some basic info</li> 
+   <li>ejiembpkrgknobkrgb</li>
+   <li>kjwnrgoipeerm</li>
+  </ul>
+  
+  <!-- Product Pricing -->
+  <div class="product-price">148$ <a class="cart-btn" href="#">Add to cart</a></div>
+  </div>
+  </div>
+  <pre>
+{% endblock %}

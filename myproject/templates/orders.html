@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Список заказов{% endblock %}
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/orders.css' %}">
+<div class = "flex-container">
+<form action="sendText" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input name="text" type="text"><br><br>
+    <input type="submit" value="Submit" >
+</form>
+<form action ="sendInfo" method = "post" enctype = "multipart/form-data" class = "checkbox-container">
+    {% csrf_token %}
+    <h4>Фильтрация</h4>
+    <label for="filter-a">Арифметический:</label>
+    <input type="checkbox" name="check[]" value="arifm">
+    <label for="filter-b">Логический:</label>
+    <input type="checkbox" name="check[]" value="logic">
+    <input type="submit" value="Ok" >
+  </div>  
+  <a href="{% url 'basic_url' %}" class="buy-button">Отмена</a>
+</div>
+
+<ul class="card-grid">
+    {% for order in data.orders %}
+      {% if forloop.counter0|divisibleby:4%}
+        <div class="row">
+      {% endif %}
+      <div class="card">
+        <img src={{order.img}} alt="Product Image">
+        <h2 class="title">{{order.title}}</h2>
+        <p class="description">Тип операции:{{order.type}}</p>
+        <a href="{% url 'order_url' order.id %}" class="buy-button">Подробнее</a>
+      </div>
+      {% if forloop.counter|divisibleby:4 or forloop.last %}
+        </div>
+      {% endif %}
+    {% empty %}
+      <li>Список пуст</li>
+    {% endfor %}
+  </ul>
+  
+
+{% endblock %}
