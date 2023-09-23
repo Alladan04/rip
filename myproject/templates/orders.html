@@ -5,13 +5,27 @@
 {% block content %}
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/orders.css' %}">
+<div>
+<div class="box">
+  <form name="search" method = "get" enctype="multipart/form-data">
+    {% csrf_token %}
+      <input type="text" class="input" name="text" onmouseout="this.value = ''; this.blur();">
+  </form>
+  <i class="fas fa-search"></i>
+  
+  <a href="{% url 'basic_url' %}" class="buy-button">Отмена</a>
+
+</div>
+<!--
 <div class = "flex-container">
-<form action="sendText" method="post" enctype="multipart/form-data">
+<form method="get" enctype="multipart/form-data">
     {% csrf_token %}
     <input name="text" type="text"><br><br>
     <input type="submit" value="Submit" >
 </form>
-<form action ="sendInfo" method = "post" enctype = "multipart/form-data" class = "checkbox-container">
+-->
+<!-- 
+<form  method = "get" enctype = "multipart/form-data" class = "checkbox-container">
     {% csrf_token %}
     <h4>Фильтрация</h4>
     <label for="filter-a">Арифметический:</label>
@@ -19,10 +33,43 @@
     <label for="filter-b">Логический:</label>
     <input type="checkbox" name="check[]" value="logic">
     <input type="submit" value="Ok" >
-  </div>  
-  <a href="{% url 'basic_url' %}" class="buy-button">Отмена</a>
+    -->
+  
+  <!--<a href="{% url 'basic_url' %}" class="buy-button">Отмена</a>
+</div>-->
+
+<ul class="card-grid">
+  <div class="container">
+    {% for order in data.orders %}
+    {% if forloop.counter0|divisibleby:3%}
+        <div class="row">
+      {% endif %}
+      <div class="card">
+          <div class="face face1">
+              <div class="content">
+                  <img src={{order.img}}>
+                  <h3>{{order.title}}</h3>
+              </div>
+          </div>
+          <div class="face face2">
+              <div class="content">
+                  <p>{{order.text}}</p>
+                      <a href="{% url 'order_url' order.id %}">Read More</a>
+              </div>
+          </div>
+      </div> 
+      {% if forloop.counter|divisibleby:3 or forloop.last %}
+        </div>
+      {% endif %}
+    {% empty %}
+      <li>Список пуст</li>
+      {% endfor %}
+  </div>
+</ul>
+  
 </div>
 
+<!--
 <ul class="card-grid">
     {% for order in data.orders %}
       {% if forloop.counter0|divisibleby:4%}
@@ -41,6 +88,6 @@
       <li>Список пуст</li>
     {% endfor %}
   </ul>
-  
+ --> 
 
 {% endblock %}

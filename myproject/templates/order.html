@@ -4,25 +4,74 @@
 
 {% block content %}
 {% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/order.css' %}">
-  <!-- Left Column / Headphones Image --></pre>
+<link rel="stylesheet" type="text/css" href="{% static 'css/order1.css' %}">
+<main>
+  <div class="card">
+    <div class="card__title">
+      <div class="icon">
+        <a href="#"><i class="fa fa-arrow-left"></i></a>
+      </div>
+      
+    </div>
+    <div class="card__body">
+      <div class="half">
+        <div class="featured_text">
+          <h1>{{title}}</h1>
+          <p class="sub">Бинарная операция:</p>
+          <p class="price">{{price}}</p>
+        </div>
+        <div class="image">
+          <img src={{img}} alt="">
+        </div>
+      </div>
+      <div class="half">
+        <div class="description">
+          <p>{{text}}</p>
+        </div>
+        <span class="stock"><i class="fa fa-pen"></i></span><!-- can add pink text here-->
+        <div class="reviews">
+          <ul class="stars">
+            <li><i class="fa fa-star"></i></li> <!--add features here-->
+            <li><i class="fa fa-star"></i></li>
+            <li><i class="fa fa-star"></i></li>
+            <li><i class="fa fa-star"></i></li>
+            <li><i class="fa fa-star-o"></i></li>
+          </ul>
+          <span></span><!--add reviews count here-->
+        </div>
+      </div>
+    </div>
+    <div class="card__footer">
+      <div class="recommend">
+        <p>Recommended by</p>
+        <h3>Allochka Danielyan</h3>
+      </div>
+      <div class="action">
+        <button type="button">Добавить в заявку</button>
+      </div>
+    </div>
+  </div>
+</main>
+  <!-- Left Column / Headphones Image -->
+<!--</pre>
   <div class="left-column"><img src={{img}} alt="Image" /> </div>
-  <pre> 
+  <pre> -->
    
-    <!-- Right Column --></pre>
-  <div class="right-column"><!-- Product Description -->
+    <!-- Right Column </pre>
+  <div class="right-column">--><!-- Product Description 
   <div class="product-description">
   <h1>{{title}}</h1>
-  <p> Some other stuff</p>
+  <p> {{type}}</p>
   <ul>
-   <li>just some basic info</li> 
+   <li>{{text}}</li> 
    <li>ejiembpkrgknobkrgb</li>
    <li>kjwnrgoipeerm</li>
   </ul>
-  
-  <!-- Product Pricing -->
+  -->
+  <!-- Product Pricing 
   <div class="product-price">148$ <a class="cart-btn" href="#">Add to cart</a></div>
   </div>
   </div>
   <pre>
+    -->
 {% endblock %}

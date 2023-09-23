@@ -1,153 +1,156 @@
-html, body {
-  height: 100%;
-  width: 100%;
+body{
   margin: 0;
-  font-family: 'Roboto', sans-serif;
-}
-  
-/* Обертка карточки */
-.card {
-  width: 300px;
-  box-shadow: 0 4px 8px 0 rgba(39, 119, 53, 0.2);
-  margin: 16px;
-  padding: 10px;
-  border-radius: 8px;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 0;
+  min-height: 100vh;
+  background: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: consolas;
 }
 
-/* Заголовок карточки */
-.card .title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 8px;
-}
+.container{
 
-/* Изображение продукта */
-.card img {
+  margin-top: 100px;
   width: 100%;
-  height: auto;
-  margin-bottom: 8px;
-}
-
-/* Описание продукта */
-.card p {
-  font-size: 16px;
-  margin-bottom: 8px;
-}
-
-/* Цена продукта */
-.card .price {
-  font-weight: bold;
-  color: #ff0000;
-}
-
-.buy-button {
   position: relative;
-  margin-left: 20px;
-  display: inline-flex;
-  padding: 8px 16px;
-  color: #1b4b19;
-  background-color: #b4e0a8;
-  border: none;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-/* Кнопка купить */
-.card .buy-button {
   display: inline-block;
-  padding: 8px 16px;
-  color: #1b4b19;
-  background-color: #b4e0a8;
-  border: none;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: bold;
-}
-.card-container {
-  display: flex;
-  list-style-type: none;
-}
-
-.card {
-  
-  margin-right: 10px;
-  /* Дополнительные стили для карточек */
-}
-
-.card-grid {
-  display: flex;
-  flex-wrap: wrap;
-  padding-left: 0px;
-}
-
-.row {
-  display: flex;
   justify-content: space-between;
 }
 
-form {
-  float:left;
-  margin: 20px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  width: 270px;
-}
-
-input[type="text"] {
-  width: 80%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-input[type="submit"] {
-  background-color: #4CAF50;
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 4px;
+.container .card{
+  position: relative;
   cursor: pointer;
 }
 
-input[type="submit"]:hover {
-  background-color: #45a049;
+.container .card .face{
+  width: 300px;
+  height: 200px;
+  transition: 0.5s;
 }
 
-input[type="submit"]:focus {
-  outline: none;
-}
-
-.checkbox-container {
-  clear: both;
+.container .card .face.face1{
   position: relative;
-  margin: 20px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  width: 270px;
- 
+  background: #333;
+  display: flex;
+  justify-content: center;
   align-items: center;
+  z-index: 1;
+  transform: translateY(100px);
 }
 
-.checkbox-container label {
-  color: #0b6623;
-  margin-right: 10px;
+.container .card:hover .face.face1{
+  background: #ff0057;
+  transform: translateY(0);
 }
 
-.checkbox-container input[type="checkbox"] {
-  margin-right: 5px;
-  display: block;
+.container .card .face.face1 .content{
+  opacity: 0.2;
+  transition: 0.5s;
+}
+
+.container .card:hover .face.face1 .content{
+  opacity: 1;
+}
+
+.container .card .face.face1 .content img{
+  max-width: 100px;
+}
+
+.container .card .face.face1 .content h3{
+  margin: 10px 0 0;
+  padding: 0;
+  color: #fff;
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.container .card .face.face2{
+  position: relative;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  transform: translateY(-100px);
+}
+
+.container .card:hover .face.face2{
+  transform: translateY(0);
+}
+
+.container .card .face.face2 .content p{
+  margin: 0;
+  padding: 0;
+}
+
+.container .card .face.face2 .content a{
+  margin: 15px 0 0;
+  display:  inline-block;
+  text-decoration: none;
+  font-weight: 900;
+  color: #333;
+  padding: 5px;
+  border: 1px solid #333;
+}
+
+.container .card .face.face2 .content a:hover{
+  background: #333;
+  color: #fff;
 }
 .flex-container {
   display: flex;
   flex-direction: row;
   justify-content:last baseline;
 }
+.row {
+  display: flex;
+  justify-content: left;
+}
+
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+
+.box{
+  position: relative;
+  margin-left: 30px;
+}
+
+.input {
+  padding: 10px;
+  width: 80px;
+  height: 80px;
+  background: none;
+  border: 4px solid #ff0057;
+  border-radius: 50px;
+  box-sizing: border-box;
+  font-family: Comic Sans MS;
+  font-size: 26px;
+  color: #ff0057;
+  outline: none;
+  transition: .5s;
+}
+.box:hover input{
+  width: 350px;
+  background: #3b3640;
+  border-radius: 10px;
+}
+.box i{
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translate(-50%,-50%);
+  font-size: 26px;
+  color: #ffd52d;
+  transition: .2s;
+}
+.box:hover i{
+  opacity: 0;
+  z-index: -1;
+}
+
