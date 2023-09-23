@@ -23,6 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.GetOrders, name = 'basic_url'),
     path('order/<int:id>/', views.GetOrder, name='order_url'),
-    path('sendText',views.sendText, name = 'sendText'),
-    path('sendInfo', views.Filter, name = 'sendInfo')
+    #path('sendText',views.sendText, name = 'sendText'),
+    #path('sendInfo', views.Filter, name = 'sendInfo')
 ]
