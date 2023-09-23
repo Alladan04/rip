@@ -5,9 +5,9 @@ from django.shortcuts import render
 from datetime import date
 
 data ={ 'data':{'orders': [
-    {'id':1, 'title':'Сложение','img':'https://pngimg.com/uploads/plus/plus_PNG31.png','text':'some text', 'type':'Арифметический'},
-    {'id':2, 'title':'Вычитание', 'img':'https://png.pngtree.com/png-vector/20190223/ourlarge/pngtree-minus-vector-icon-png-image_696413.jpg', 'text':'some text', 'type':'Арифметический'},
-    {'id':3, 'title':'Умножение', 'img':'https://cdn-icons-png.flaticon.com/512/1/1659.png','text':'some text','type':'Арифметический'},
+    {'id':1, 'title':'Сложение','img':'https://pngimg.com/uploads/plus/plus_PNG31.png','text':'Сложе́ние — одна из основных бинарных математических операций двух аргументов, результатом которой является новое число, получаемое увеличением значения первого аргумента на значение второго аргумента. ', 'type':'Арифметический'},
+    {'id':2, 'title':'Вычитание', 'img':'https://png.pngtree.com/png-vector/20190223/ourlarge/pngtree-minus-vector-icon-png-image_696413.jpg', 'text':'Вычита́ние — одна из вспомогательных бинарных математических операций двух аргументов, результатом которой является новое число, получаемое уменьшением значения первого аргумента на значение второго аргумента. ', 'type':'Арифметический'},
+    {'id':3, 'title':'Умножение', 'img':'https://cdn-icons-png.flaticon.com/512/1/1659.png','text':'Умноже́ние — одна из основных математических операций над двумя аргументами, которые называются множителями или сомножителями. ','type':'Арифметический'},
     {'id':4, 'title':'Деление', 'img':'https://cdn-icons-png.flaticon.com/512/660/660236.png', 'text':'some text','type':'Арифметический'},
     {'id':5, 'title':'XOR', 'img':'https://static.thenounproject.com/png/711172-200.png','text':'sometext','type':'Логический'}
     ]}}
