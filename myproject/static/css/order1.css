@@ -67,7 +67,7 @@ main{
     > .half{
       box-sizing: border-box;
       padding: 0 15px;
-      flex: 1 0 50%;
+      flex:  0 50%;
     }
     
     .featured_text{
