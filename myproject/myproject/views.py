@@ -38,19 +38,3 @@ def GetOrder(request, id):
         if order['id'] == id:
             return render(request, 'order.html', order)
     
-'''
-def sendText(request):
-    input_text = request.POST['text']
-    orders = {'data':{'orders':[order for order in data['data']['orders'] if input_text.lower() in order['title'].lower()]}}
-    return render(request,'orders.html', orders )
-
-def Filter(request):
-    input_stuff = request.POST.getlist('check[]')
-    order = []
-    for order_ in data['data']['orders']:
-        if 'arifm' in input_stuff and order_['type'] =="Арифметический":
-            order.append(order_)
-        if  'logic' in input_stuff and order_['type'] == 'Логический':
-            order.append(order_)
-    orders = {'data':{'orders':order}}
-    return render(request,'orders.html', orders)'''
