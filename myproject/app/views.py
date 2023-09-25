@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-
-
+import psycopg2
 from datetime import date
 from .models import Operation
 '''
@@ -13,27 +12,34 @@ data ={ 'data':{'orders': [
     {'id':5, 'name':'XOR', 'img':'https://static.thenounproject.com/png/711172-200.png','text':'sometext','type':'Логический', 'prcie':12.0}
     ]}}
 '''
-
-def GetOrders(request):
-    operations = Operation.objects.all()
+def get_orders_util():
+    operations = Operation.objects.filter(status ="действует")
     data = {'data':{'orders':operations}}
+    return data
+def GetOrders(request):
     try:
         input_text = request.GET['text']
-        #check = request.GET.getlist('check[]')
+        operations = []
         if input_text:
-            orders = [order for order in data['data']['orders'] if input_text.lower() in order.name.lower()]
-        return render(request, 'orders.html', {'data':{'orders':orders}})
+            order = Operation.objects.filter(status = "действует",name__icontains=input_text)
+            data = {'data':{'orders':order}}
+        return render(request, 'orders.html', data )
     except:
-        return render(request, 'orders.html', data)
+        
+        return render(request, 'orders.html',get_orders_util())
 
     
 
 def GetOrder(request, id):
-    operations = Operation.objects.all()
-    order = Operation.objects.filter(id = id).values()
-    data ={'data':{'orders':operations}}
-    for order in data['data']['orders']:
-       if order.id == id:
-        return render(request, 'order.html', {'name':order.name, 'prcie':order.price, 'type':order.type, 'text':order.description,'img':order.img_src})
+    order = Operation.objects.filter(id = id)[0]
+    return render(request, 'order.html',{'name':order.name, 'price':order.price, 'type':order.type, 'text':order.description,'img':order.img_src})
+
 def DeleteOrder (request, id):
-   pass
+    query = "UPDATE operations SET status = 'удален' WHERE id = {id_}".format(id_= id)
+    conn = psycopg2.connect(dbname="rip", host="localhost", user="alla", password="1324", port="5432")
+    cursor = conn.cursor()
+    cursor.execute(query)
+    conn.commit()   # реальное выполнение команд sql1
+    cursor.close()
+    conn.close()
+    return render(request, 'orders.html', get_orders_util())

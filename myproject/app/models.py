@@ -18,6 +18,7 @@ class OperationRequest(models.Model):
 
 
 class Operation(models.Model):
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=30, blank=True, null=True)
     status = models.CharField(max_length =30, blank=True, null=True)  # This field type is a guess.
     type = models.CharField(max_length = 30, blank=True, null=True)  # This field type is a guess.

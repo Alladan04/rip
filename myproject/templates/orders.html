@@ -45,7 +45,11 @@
         <div class="row">
       {% endif %}
       <div class="card">
-        <button class="button-89" role="button" formaction = 'delete_url order.id' formmethod = 'post'>X</button>
+        <form name="delete" action = "{% url 'delete_url' order.id %}" method = "post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <button class="button-89" role="button" type = 'submit' >X</button>
+        </form>
+       
           <div class="face face1">
             <!-- HTML !-->
               <div class="content">
