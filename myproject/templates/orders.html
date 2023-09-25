@@ -45,13 +45,17 @@
         <div class="row">
       {% endif %}
       <div class="card">
+        <button class="button-89" role="button" formaction = 'delete_url order.id' formmethod = 'post'>X</button>
           <div class="face face1">
+            <!-- HTML !-->
               <div class="content">
                   <img src={{order.img_src}}>
                   <h3>{{order.name}}</h3>
+                  
               </div>
           </div>
           <div class="face face2">
+            
               <div class="content">
                   <p>Тип операции: {{order.type}}</p>
                       <a href="{% url 'order_url' order.id %}">Подробнее</a>

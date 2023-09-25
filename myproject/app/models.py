@@ -19,8 +19,8 @@ class OperationRequest(models.Model):
 
 class Operation(models.Model):
     name = models.CharField(max_length=30, blank=True, null=True)
-    status = models.TextField(blank=True, null=True)  # This field type is a guess.
-    type = models.TextField(blank=True, null=True)  # This field type is a guess.
+    status = models.CharField(max_length =30, blank=True, null=True)  # This field type is a guess.
+    type = models.CharField(max_length = 30, blank=True, null=True)  # This field type is a guess.
     price = models.FloatField(blank=True, null=True)  # This field type is a guess.
     description = models.TextField(blank=True, null=True)
     img_src = models.TextField(blank = True, null = True)

@@ -30,8 +30,10 @@ def GetOrders(request):
 
 def GetOrder(request, id):
     operations = Operation.objects.all()
+    order = Operation.objects.filter(id = id).values()
     data ={'data':{'orders':operations}}
     for order in data['data']['orders']:
-        if order.id == id:
-            return render(request, 'order.html', {'name':order.name, 'prcie':order.price, 'type':order.type, 'text':order.description,'img':order.img_src})
-    
+       if order.id == id:
+        return render(request, 'order.html', {'name':order.name, 'prcie':order.price, 'type':order.type, 'text':order.description,'img':order.img_src})
+def DeleteOrder (request, id):
+   pass
