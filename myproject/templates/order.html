@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Заказ №{{ data.id }}{% endblock %}
+{% block name %}Заказ №{{ data.id }}{% endblock %}
 
 {% block content %}
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/order1.css' %}">
 <main>
   <div class="card">
-    <div class="card__title">
+    <div class="card__name">
       <div class="icon">
         <a href="#"><i class="fa fa-arrow-left"></i></a>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -17,7 +17,7 @@
     <div class="card__body">
       <div class="half">
         <div class="featured_text">
-          <h1>{{title}}</h1>
+          <h1>{{name}}</h1>
           <p class="sub">Бинарная операция:</p>
           <p class="price">{{price}}</p>
         </div>
@@ -61,7 +61,7 @@
     <!-- Right Column </pre>
   <div class="right-column">--><!-- Product Description 
   <div class="product-description">
-  <h1>{{title}}</h1>
+  <h1>{{name}}</h1>
   <p> {{type}}</p>
   <ul>
    <li>{{text}}</li> 
