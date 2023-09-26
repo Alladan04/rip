@@ -22,9 +22,9 @@ class Operation(models.Model):
     name = models.CharField(max_length=30, blank=True, null=True)
     status = models.CharField(max_length =30, blank=True, null=True)  # This field type is a guess.
     type = models.CharField(max_length = 30, blank=True, null=True)  # This field type is a guess.
-    price = models.FloatField(blank=True, null=True)  # This field type is a guess.
+    #price = models.FloatField(blank=True, null=True)  # This field type is a guess.
     description = models.TextField(blank=True, null=True)
-    img_src = models.TextField(blank = True, null = True)
+    img_src = models.CharField(max_length=200, blank = True, null = True)
 
     class Meta:
         managed = False
@@ -34,9 +34,9 @@ class Operation(models.Model):
 class Request(models.Model):
     user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
     status = models.TextField(blank=True, null=True)  # This field type is a guess.
-    creation_date = models.DateField(blank=True, null=True)
-    form_date = models.DateField(blank=True, null=True)
-    finish_date = models.DateField(blank=True, null=True)
+    creation_date = models.DateTimeField(blank=True, null=True)
+    form_date = models.DateTimeField(blank=True, null=True)
+    finish_date = models.DateTimeField(blank=True, null=True)
     admin = models.ForeignKey('User', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
 
     class Meta:

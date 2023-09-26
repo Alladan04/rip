@@ -1,5 +1,6 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 import psycopg2
 from datetime import date
 from .models import Operation
@@ -32,7 +33,7 @@ def GetOrders(request):
 
 def GetOrder(request, id):
     order = Operation.objects.filter(id = id)[0]
-    return render(request, 'order.html',{'name':order.name, 'price':order.price, 'type':order.type, 'text':order.description,'img':order.img_src})
+    return render(request, 'order.html',{'name':order.name,  'type':order.type, 'text':order.description,'img':order.img_src})
 
 def DeleteOrder (request, id):
     query = "UPDATE operations SET status = 'удален' WHERE id = {id_}".format(id_= id)
@@ -42,4 +43,4 @@ def DeleteOrder (request, id):
     conn.commit()   # реальное выполнение команд sql1
     cursor.close()
     conn.close()
-    return render(request, 'orders.html', get_orders_util())
+    return redirect(reverse('basic_url'))
