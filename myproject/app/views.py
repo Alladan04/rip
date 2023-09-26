@@ -3,7 +3,12 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 import psycopg2
 from datetime import date
+
+from .serializers import OperationSerializer
 from .models import Operation
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, permissions
 '''
 data ={ 'data':{'orders': [
     {'id':1, 'name':'Сложение','img':'https://pngimg.com/uploads/plus/plus_PNG31.png','text':'Сложе́ние — одна из основных бинарных математических операций двух аргументов, результатом которой является новое число, получаемое увеличением значения первого аргумента на значение второго аргумента.', 'type':'Арифметический','price':123.0},
@@ -12,6 +17,10 @@ data ={ 'data':{'orders': [
     {'id':4, 'name':'Деление', 'img':'https://cdn-icons-png.flaticon.com/512/660/660236.png', 'text':'some text','type':'Арифметический', 'price':5.0},
     {'id':5, 'name':'XOR', 'img':'https://static.thenounproject.com/png/711172-200.png','text':'sometext','type':'Логический', 'prcie':12.0}
     ]}}
+'''
+
+
+
 '''
 def get_orders_util():
     operations = Operation.objects.filter(status ="действует")
@@ -29,7 +38,22 @@ def GetOrders(request):
         
         return render(request, 'orders.html',get_orders_util())
 
-    
+'''
+class OperationsView(APIView):
+
+    def get(self, request):
+        try:
+            input_text = request.data['text']
+            if input_text:
+                orders = Operation.objects.filter(status = "действует",name__icontains=input_text)
+        except:
+            orders = Operation.objects.filter(status = "действует")
+        serialized = [OperationSerializer(order).data for order in orders]
+        #a = request.GET['a']
+        return Response({'data': serialized})
+       # return ({'data':a})
+
+
 
 def GetOrder(request, id):
     order = Operation.objects.filter(id = id)[0]
