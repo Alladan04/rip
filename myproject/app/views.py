@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 import psycopg2
 from datetime import date
-
+from django.http import UnreadablePostError
 from .serializers import OperationSerializer
 from .models import Operation
 from rest_framework.views import APIView
@@ -39,7 +39,7 @@ def GetOrders(request):
         return render(request, 'orders.html',get_orders_util())
 
 '''
-class OperationsView(APIView):
+class OperationListView(APIView):
 
     def get(self, request):
         try:
@@ -49,11 +49,25 @@ class OperationsView(APIView):
         except:
             orders = Operation.objects.filter(status = "действует")
         serialized = [OperationSerializer(order).data for order in orders]
-        #a = request.GET['a']
         return Response({'data': serialized})
-       # return ({'data':a})
-
-
+    
+    def post(self, request):
+            serializer = OperationSerializer(data= request.data['data'])
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response ({'data':serializer.data})
+    
+class OperationView(APIView):
+     
+    def get(self, request,id):
+        order = Operation.objects.filter(id = id)[0]
+        serializer = OperationSerializer(order)
+        #serializer.is_valid(raise_exception=True)
+        return Response({'data':serializer.data})
+    def put(self, request):
+        pass
+    def delete(self, request):
+        pass
 
 def GetOrder(request, id):
     order = Operation.objects.filter(id = id)[0]

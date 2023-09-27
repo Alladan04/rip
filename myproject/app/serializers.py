@@ -7,4 +7,4 @@ class OperationSerializer(serializers.ModelSerializer):
         # Модель, которую мы сериализуем
         model = Operation
         # Поля, которые мы сериализуем
-        fields = ["name", "status", "type", "description"]
+        fields = ["name", "status", "type", "description","pk"]

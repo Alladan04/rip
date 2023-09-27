@@ -25,9 +25,9 @@ from app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
    
-    path('order/<int:id>/', views.GetOrder, name='order_url'),
+    path('order/<int:id>/', views.OperationView.as_view() , name='order_url'),
     path ('delete/<int:id>/', views.DeleteOrder, name = 'delete_url'),
-    path('', views.OperationsView.as_view(), name = 'basic_url'),
+    path('', views.OperationListView.as_view(), name = 'basic_url'),
     #path('sendText',views.sendText, name = 'sendText'),
     #path('sendInfo', views.Filter, name = 'sendInfo')
 ]
