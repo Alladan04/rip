@@ -19,26 +19,6 @@ data ={ 'data':{'orders': [
     ]}}
 '''
 
-
-
-'''
-def get_orders_util():
-    operations = Operation.objects.filter(status ="действует")
-    data = {'data':{'orders':operations}}
-    return data
-def GetOrders(request):
-    try:
-        input_text = request.GET['text']
-        operations = []
-        if input_text:
-            order = Operation.objects.filter(status = "действует",name__icontains=input_text)
-            data = {'data':{'orders':order}}
-        return render(request, 'orders.html', data )
-    except:
-        
-        return render(request, 'orders.html',get_orders_util())
-
-'''
 class OperationListView(APIView):
 
     def get(self, request):
@@ -59,26 +39,27 @@ class OperationListView(APIView):
     
 class OperationView(APIView):
      
-    def get(self, request,id):
+    def get(self, request, id):
         order = Operation.objects.filter(id = id)[0]
         serializer = OperationSerializer(order)
-        #serializer.is_valid(raise_exception=True)
         return Response({'data':serializer.data})
-    def put(self, request):
-        pass
-    def delete(self, request):
-        pass
-
-def GetOrder(request, id):
-    order = Operation.objects.filter(id = id)[0]
-    return render(request, 'order.html',{'name':order.name,  'type':order.type, 'text':order.description,'img':order.img_src})
-
-def DeleteOrder (request, id):
-    query = "UPDATE operations SET status = 'удален' WHERE id = {id_}".format(id_= id)
-    conn = psycopg2.connect(dbname="rip", host="localhost", user="alla", password="1324", port="5432")
-    cursor = conn.cursor()
-    cursor.execute(query)
-    conn.commit()   # реальное выполнение команд sql1
-    cursor.close()
-    conn.close()
-    return redirect(reverse('basic_url'))
+    
+    def put(self, request,id):
+            operation = Operation.objects.filter(id=id)[0]
+            serializer = OperationSerializer(operation, data = request.data['data'], partial = True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({'data':serializer.data})
+       
+    def delete(self, request, id):
+        query = "UPDATE operations SET status = 'удален' WHERE id = {id_}".format(id_= id)
+        conn = psycopg2.connect(dbname="rip", host="localhost", user="alla", password="1324", port="5432")
+        cursor = conn.cursor()
+        cursor.execute(query)
+        conn.commit()   # реальное выполнение команд sql1
+        cursor.close()
+        conn.close()
+        data = Operation.objects.filter(id = id)[0]
+        serializer = OperationSerializer(data)
+        redirect(reverse('basic_url'))
+        return Response({'data':serializer.data})
