@@ -123,3 +123,5 @@ rpmtools
 local
 .DS_Store
 myproject/myproject/__pycache__/urls.cpython-310.pyc
+myproject/myproject/__pycache__/settings.cpython-310.pyc
+myproject/myproject/__pycache__/urls.cpython-310.pyc
