@@ -32,7 +32,7 @@ class Operation(models.Model):
 
 
 class Request(models.Model):
-    user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=False)
     status = models.TextField(blank=True, null=True)  # This field type is a guess.
     creation_date = models.DateTimeField(blank=True, null=True)
     form_date = models.DateTimeField(blank=True, null=True)

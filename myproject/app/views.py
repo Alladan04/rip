@@ -4,8 +4,8 @@ from django.urls import reverse
 import psycopg2
 from datetime import date
 from django.http import UnreadablePostError
-from .serializers import OperationSerializer
-from .models import Operation
+from .serializers import OperationSerializer,UserSerializer, OperationRequestSerializer,RequestSerializer
+from .models import Operation,User,OperationRequest,Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
@@ -17,6 +17,19 @@ data ={ 'data':{'orders': [
     {'id':4, 'name':'Деление', 'img':'https://cdn-icons-png.flaticon.com/512/660/660236.png', 'text':'some text','type':'Арифметический', 'price':5.0},
     {'id':5, 'name':'XOR', 'img':'https://static.thenounproject.com/png/711172-200.png','text':'sometext','type':'Логический', 'prcie':12.0}
     ]}}
+'''
+'''
+заметки
+создание заявки происходит внутри вью услуг, там делаем метод пост, через который можем 
+добавить продукт в заявку или создать новую заявку, если ее не существует (активной) можно проверить в таблице м-м
+м-м хранит только активные заявки, если что они удаляются оттуда физически
+из самой таблицы заявок удаляем заявки только логически
+
+у м-м нет своего пк, используем составной пк
+
+при гет-запросе в заявки, надо получить данные из таблиц м-м и услуги (заджойнить наверно как-то)
+
+
 '''
 
 class OperationListView(APIView):
@@ -35,7 +48,9 @@ class OperationListView(APIView):
             serializer = OperationSerializer(data= request.data['data'])
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response ({'data':serializer.data})
+            operations = Operation.objects.filter(status = "действует")
+            serializer = [OperationSerializer(operation).data for operation in operations]
+            return Response ({'data':serializer})
     
 class OperationView(APIView):
      
@@ -52,14 +67,34 @@ class OperationView(APIView):
             return Response({'data':serializer.data})
        
     def delete(self, request, id):
-        query = "UPDATE operations SET status = 'удален' WHERE id = {id_}".format(id_= id)
-        conn = psycopg2.connect(dbname="rip", host="localhost", user="alla", password="1324", port="5432")
-        cursor = conn.cursor()
-        cursor.execute(query)
-        conn.commit()   # реальное выполнение команд sql1
-        cursor.close()
-        conn.close()
-        data = Operation.objects.filter(id = id)[0]
+        #query = "UPDATE operations SET status = 'удален' WHERE id = {id_}".format(id_= id)#change this to ORM!!!
+        operation = Operation.objects.get(id = id)
+        operation.status = 'удален'
+        operation.save()
+        data = Operation.objects.filter()#filter(id = id)[0]
         serializer = OperationSerializer(data)
         redirect(reverse('basic_url'))
         return Response({'data':serializer.data})
+
+class UserView(APIView):
+     def get(self, request, id):
+        user = User.objects.filter(id = id)[0]
+        serializer = UserSerializer(user)
+        return Response({'data':serializer.data})
+     '''def post(self, request):
+            serializer = UserSerializer(data= request.data['data'])
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response ({'data':serializer.data})'''
+
+class RequestListView(APIView):
+     def get(self, request):
+          #список надо по ИД юзера получать? 
+        requests = Request.objects.all()
+        serialized_list = [RequestSerializer(request).data for request in requests]
+        return Response(data= {'data':serialized_list})
+     
+class RequestView(APIView):
+     def get (self, request,id):
+          request = Request.objects.filter(id = id)
+          

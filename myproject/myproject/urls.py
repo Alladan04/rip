@@ -28,6 +28,7 @@ urlpatterns = [
     path('order/<int:id>/', views.OperationView.as_view() , name='order_url'),
     #path ('delete/<int:id>/', views.OperationView.as_view(), name = 'delete_url'),
     path('', views.OperationListView.as_view(), name = 'basic_url'),
+    path('user/<int:id>',views.UserView.as_view(), name = 'user_url')
     #path('sendText',views.sendText, name = 'sendText'),
     #path('sendInfo', views.Filter, name = 'sendInfo')
 ]
