@@ -122,3 +122,4 @@ dmypy.json
 rpmtools
 local
 .DS_Store
+myproject/myproject/__pycache__/urls.cpython-310.pyc
