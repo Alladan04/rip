@@ -29,8 +29,19 @@ data ={ 'data':{'orders': [
 
 при гет-запросе в заявки, надо получить данные из таблиц м-м и услуги (заджойнить наверно как-то)
 
+статусы заявок: введен, сформирвоан/в обработке, принят/завершен, отколонен, удален
+пользовательь может сформировать заявку (пут), удалить заявку(делит)
+модератор может отклонить или принять
+
+введен, когда добавляешь в корзину (такая только 1 или 0 заявок у каждого пользователя)
+когда пользователь оформил заказ, заявка стала сформированной
+потом она попадает к модератору и тот ставит статус принят или отклонен
+
 
 '''
+
+def get_id():
+     return 1
 
 class OperationListView(APIView):
 
@@ -53,6 +64,10 @@ class OperationListView(APIView):
             return Response ({'data':serializer})
     
 class OperationView(APIView):
+    def post(self, request, id):
+        user_id =  get_id()
+        if Request.objects.filter(user = User.objects.get(id = user_id), status='введён'):
+             op_r = OperationRequest()
      
     def get(self, request, id):
         order = Operation.objects.filter(id = id)[0]
@@ -71,10 +86,12 @@ class OperationView(APIView):
         operation = Operation.objects.get(id = id)
         operation.status = 'удален'
         operation.save()
-        data = Operation.objects.filter()#filter(id = id)[0]
-        serializer = OperationSerializer(data)
+        #data = Operation.objects.filter(id = id)[0]
+        operations = Operation.objects.filter(status = "действует")
+        serialized = [OperationSerializer(order).data for order in operations]
+        #serializer = OperationSerializer(data)
         redirect(reverse('basic_url'))
-        return Response({'data':serializer.data})
+        return Response({'data':serialized})
 
 class UserView(APIView):
      def get(self, request, id):
