@@ -13,10 +13,7 @@ data ={ 'data':{'orders': [
     {'id':5, 'name':'XOR', 'img':'https://static.thenounproject.com/png/711172-200.png','text':'sometext','type':'Логический', 'prcie':12.0}
     ]}}
 '''
-def get_orders_util():
-    operations = Operation.objects.filter(status ="действует")
-    data = {'data':{'orders':operations}}
-    return data
+
 def GetOrders(request):
     try:
         input_text = request.GET['text']
@@ -26,8 +23,9 @@ def GetOrders(request):
             data = {'data':{'orders':order}}
         return render(request, 'orders.html', data )
     except:
-        
-        return render(request, 'orders.html',get_orders_util())
+        operations = Operation.objects.filter(status ="действует")
+        data = {'data':{'orders':operations}}
+        return render(request, 'orders.html',data)
 
     
 
