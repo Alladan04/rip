@@ -14,21 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
+from app import views
 from django.urls import include, path
 from rest_framework import routers
-
-from app import views
-
-#router = routers.DefaultRouter()
+router = routers.DefaultRouter()
 #router.register(r'', views.OperationView, basename='operations')
+'''делать урл с пустым ИД нельзя, только если сделать ИД=0 и при этом значении выдавать список
+но я не хочу костыльно делать, поэтому лучше сделаю, мб немного избыточно, но зато последовательно и понятно'''
 urlpatterns = [
+    path('', include(router.urls)),
     path('admin/', admin.site.urls),
-   
-    path('order/<int:id>/', views.OperationView.as_view() , name='order_url'),
-    #path ('delete/<int:id>/', views.OperationView.as_view(), name = 'delete_url'),
-    path('', views.OperationListView.as_view(), name = 'basic_url'),
-    path('user/<int:id>',views.UserView.as_view(), name = 'user_url')
-    #path('sendText',views.sendText, name = 'sendText'),
-    #path('sendInfo', views.Filter, name = 'sendInfo')
+    path(r'order/<int:id>/', views.OperationView.as_view() , name='order_url'),
+    path(r'order/', views.OperationListView.as_view(), name = 'order_list_url'),
+    path(r'request/', views.RequestListView.as_view(), name = 'request_list_url'),
+    path (r'request/<int:id>/', views.get_request, name = 'request_url')
 ]

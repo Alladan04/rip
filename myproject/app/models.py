@@ -11,6 +11,9 @@ from django.db import models
 class OperationRequest(models.Model):
     operation = models.ForeignKey('Operation', models.DO_NOTHING, blank=True, null=True)
     request = models.ForeignKey('Request', models.DO_NOTHING, blank=True, null=True)
+    operand1 = models.IntegerField(blank=True)
+    operand2 = models.IntegerField(blank=True)
+    result = models.IntegerField(blank = True)
 
     class Meta:
         managed = False
@@ -32,6 +35,7 @@ class Operation(models.Model):
 
 
 class Request(models.Model):
+    id = models.AutoField(primary_key=True, auto_created=True)##new field 20/10
     user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=False)
     status = models.TextField(blank=True, null=True)  # This field type is a guess.
     creation_date = models.DateTimeField(blank=True, null=True)
