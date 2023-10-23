@@ -12,6 +12,9 @@ from rest_framework import authentication, permissions
 import datetime
 from rest_framework.decorators import api_view
 from  rest_framework.exceptions import bad_request
+import requests as python_requests
+import json
+from rest_framework import status as r_status
 '''
 data ={ 'data':{'orders': [
     {'id':1, 'name':'Сложение','img':'https://pngimg.com/uploads/plus/plus_PNG31.png','text':'Сложе́ние — одна из основных бинарных математических операций двух аргументов, результатом которой является новое число, получаемое увеличением значения первого аргумента на значение второго аргумента.', 'type':'Арифметический','price':123.0},
@@ -46,7 +49,7 @@ data ={ 'data':{'orders': [
 одинаковые операция и заявка, но разные операнды. можно было бы в составной ключ включит еще и операнды,
 конечно, но это кажется нецелесообразным
 '''
-
+#TODO: Исправить приколы с таймзоной
 def get_us_id():
      return 1
 def get_adm_id():
@@ -84,10 +87,10 @@ class OperationView(APIView):
             try:
                 req = Request.objects.create(user= User.objects.get(id = user_id), status = "введён",creation_date =datetime.datetime.now().astimezone())
                 OperationRequest.objects.create(operation = Operation.objects.get(id = id), request = req,  operand1 = request.data["data"]["operand1"], operand2 = request.data["data"]["operand2"])
-                #Здесь надо создать новый реквест со статусом введен, и тоже создать новый м-м, сохранить его в бд м-м
+                #ЧТО ТУТ ВОЗВРАЩАТЬ И КАК ЭТО СДЕЛАТЬ????
                 return Response(status=200)
             except:
-                return Response (status = 404)
+                return Response (status = 400, data = "Bad Request. Probably incorrect request body or the operation you are referring to does not exist")
      
     def get(self, request, id):
         order = Operation.objects.filter(id = id)[0]
@@ -135,18 +138,119 @@ class RequestListView(APIView):
             return Response(data= {'data':serialized_list})
         except:
             return Response( status = 400, data = "Bad Request")
-     
-@api_view(['Get'])
-def get_request (request,id):
+   
+class RequestView(APIView):
+    def get (self, request,id):
+        ''' возвращает заявку по ИД вместе со всеми услугами, которые в нее включены и их подробной информацией
+        (возможно, это избыточно, и было бы достаточно вернуть элемент из м-м, ссылающийся на саму услугу по ключу)
+        Если введен ИД несуществующей заявки, возвращает бэд реквест'''
+        try:
+            ob_request = Request.objects.filter(id = id)[0]
+            opreqs= OperationRequest.objects.filter(request = ob_request)
+            #operations = [opreq.operation for opreq in opreqs]
+            #serialized_operations = [OperationSerializer(operation).data for operation in operations]
+            serialized_opreq = [OperationRequestSerializer(opreq).data for opreq in opreqs]
+            for i in serialized_opreq:
+                i['operation'] = OperationSerializer(Operation.objects.get(id = i['operation'])).data
+            serialized_request= RequestSerializer(ob_request).data
+            return Response(data = {'data':{'request':serialized_request, 'items':serialized_opreq}})#'operations':serialized_operations}})
+        except:
+            return Response(status=400, data = "Bad Request. Probably the request you are referring to does not exist") 
+    def delete(self,request,id):
+        ''' меняет статус выбранной заявки текущего юзера на удалён
+        потом удаляет все связанные элементы из м-м физически
+        если подали ИД который не существует, возвращает бэд реквест'''
+        try:
+            user_id = get_us_id()
+            ob_request = Request.objects.filter(id =id, user_id = user_id)[0]
+            ob_request.status = 'удалён'
+            ob_request.finish_date = datetime.datetime.now().astimezone()
+            ob_request.save()
+            op_reqs = OperationRequest.objects.filter(request = ob_request)
+            for op_req in op_reqs:
+                op_req.delete()
+                #ЧТО ВОЗВРАЩАТЬ??
+            return Response(status = r_status.HTTP_200_OK, data = 'Deleted request #{n} '.format(n = id))
+        except:
+            return Response(status = 400, data = 'Bad request. Probably the request you are referring to does not exist')
+class OperationRequestView(APIView):
+    def delete(self, request, id):
+        #ТУТ наверно стоит вернуть гет из Реквест по реквест_ид из м-м
+        #Но как это сделать?(
+        try:
+            op_req = OperationRequest.objects.get(id = id)
+            if (op_req):
+                req = op_req.request
+                op = op_req.operation
+                op_req.delete()
+                return Response(status = r_status.HTTP_200_OK, data ='Deleted operation #{op} from request#{req}'.format(req = req, op=op))
+        except:
+            return Response(status = 400, data = 'Bad request. Probably the id you are referring to does not exist')
+        return Response (status = 400, data = 'lol')
+    def put(self, request, id): #change operands
+        try:
+            operation_r = OperationRequest.objects.filter(id=id)[0]
+            serializer = OperationRequestSerializer(operation_r, data = request.data['data'], partial = True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({'data':serializer.data})
+        except:
+            return Response(status = 400, data = 'Bad request. Probably wrong request body or id')
+
+#TODO: добавить изменение статуса с
+# введен-> в работе
+# в работе->завершен
+# в работе ->  отменён  
+@api_view(['Put'])
+def form(request, id):
+    user_id = get_us_id()
+    #тут менять по ИД заявки или по ИД юзера?
+    req = Request.objects.filter(id = id, user_id = user_id, status = 'введён')[0]
+    req.status = 'в работе'
+    req.form_date = datetime.datetime.now().astimezone()
+    req.save()
+    return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
+
+def operation_util( req: Request):
+    item = OperationRequest.objects.filter(request = req)
+    for i in item:
+        a = i.operand1
+        b = i.operand2
+        match i.operation.id:
+            case 1:
+                i.result = a|b
+            case 2:
+                i.result = a&b
+            case 3:
+                i.result = a^b
+            case 4:
+                i.result = ~(a|b)
+            case 5:
+                i.result = ~(a&b)
+            case 6:
+                i.result = ~a
+        i.save()
+    return req
+            
+
+@api_view(['Put'])
+def decline_accept(request, id):
+    admin_id = get_adm_id()
+    #тут менять по ИД заявки или по ИД юзера?\
     try:
-        request = Request.objects.filter(id = id)[0]
-        opreqs= OperationRequest.objects.filter(request = request)
-        #operations = [opreq.operation for opreq in opreqs]
-        #serialized_operations = [OperationSerializer(operation).data for operation in operations]
-        serialized_opreq = [OperationRequestSerializer(opreq).data for opreq in opreqs]
-        for i in serialized_opreq:
-            i['operation'] = OperationSerializer(Operation.objects.get(id = i['operation'])).data
-        serialized_request= RequestSerializer(request).data
-        return Response(data = {'data':{'request':serialized_request, 'items':serialized_opreq}})#'operations':serialized_operations}})
+        status= request.data['data']['status']
     except:
-        return Response(status=400, data = "Bad Request. Probably the request you are referring to does not exist") 
+        return Response(status = r_status.HTTP_400_BAD_REQUEST)
+    if not status in ['отменён', 'завершён']:
+        return Response(status = r_status.HTTP_400_BAD_REQUEST)
+    try:
+        req = Request.objects.filter(id = id, admin_id = admin_id, status = 'в работе')[0]
+    except:
+       return  Response(status = r_status.HTTP_404_NOT_FOUND)
+    if status == 'завершён':
+        operation_util(req)
+    req.status = status
+    req.finish_date = datetime.datetime.now().astimezone()
+    req.save()
+    return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
+  
