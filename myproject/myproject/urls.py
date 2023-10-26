@@ -27,20 +27,20 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path(r'order/<int:id>/', OperationViews.OperationView.as_view() , name='order_url'),
-    path(r'order/', OperationViews.OperationListView.as_view(), name = 'order_list_url'),
+    path(r'operation/<int:id>/', OperationViews.OperationView.as_view() , name='operation_url'),
+    path(r'operation/', OperationViews.OperationListView.as_view(), name = 'operation_list_url'),
     path(r'request/', RequestViews.RequestListView.as_view(), name = 'request_list_url'),
     path (r'request/<int:id>/', RequestViews.RequestView.as_view(), name = 'request_url'),
     path(r'request/form/<int:id>/', RequestViews.form, name = 'form_request_url'),
     path(r'request/finish/<int:id>/', RequestViews.decline_accept, name = 'finish_url'),
-    path(r'request/order/<int:id>/', OpReqViews.OperationRequestView.as_view(), name = 'order_request_url'),
+    path(r'request/operation/<int:id>/', OpReqViews.OperationRequestView.as_view(), name = 'operation_request_url'),
 
 ]
-'''  path(r'order/', views.OperationListView.as_view(), name = 'order_list_url'),
+'''  path(r'operation/', views.OperationListView.as_view(), name = 'operation_list_url'),
    # path(r'add/<int:id>', views.update_request, name = 'update_request_url'),
     path(r'request/', views.RequestListView.as_view(), name = 'request_list_url'),
     path (r'request/<int:id>/', views.RequestView.as_view(), name = 'request_url'),
-    path(r'request/order/<int:id>/', views.OperationRequestView.as_view(), name = 'order_request_url'),
+    path(r'request/operation/<int:id>/', views.OperationRequestView.as_view(), name = 'operation_request_url'),
     path(r'request/form/<int:id>/', views.form, name = 'form_request_url'),
     path(r'request/finish/<int:id>/', views.decline_accept, name = 'finish_url')
     '''

@@ -15,7 +15,8 @@ from  rest_framework.exceptions import bad_request
 import requests as python_requests
 import json
 from rest_framework import status as r_status
-
+from .filters import RequestFilter
+import pytz
 def get_us_id():
      return 1
 def get_adm_id():
@@ -27,7 +28,7 @@ class RequestListView(APIView):
         status_list=статус1|статус2...и т.д.
         если передан статус, которого не существует, возвращает бэд реквест'''
         user_id = get_us_id()
-        try:
+        '''   try:
             status_list = request.query_params['status_list']
         except:
             status_list = []
@@ -35,7 +36,8 @@ class RequestListView(APIView):
             requests = Request.objects.filter(user_id=user_id)
         else:
             status_list =status_list.split('|')
-            requests = Request.objects.filter(user_id = user_id, status__in = status_list) 
+            requests = Request.objects.filter(user_id = user_id, status__in = status_list) '''
+        requests = RequestFilter(Request.objects,request, user_id)
         try:
             serialized_list = [RequestSerializer(request).data for request in requests]
             return Response(data= {'data':serialized_list})
@@ -67,7 +69,7 @@ class RequestView(APIView):
             user_id = get_us_id()
             ob_request = Request.objects.filter(id =id, user_id = user_id)[0]
             ob_request.status = 'удалён'
-            ob_request.finish_date = datetime.datetime.now().astimezone()
+            ob_request.finish_date = datetime.datetime.now(tz=pytz.UTC)
             ob_request.save()
             op_reqs = OperationRequest.objects.filter(request = ob_request)
             for op_req in op_reqs:
@@ -86,7 +88,7 @@ def form(request, id):
     except:
         return Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match')
     req.status = 'в работе'
-    req.form_date = datetime.datetime.now().astimezone()
+    req.form_date = datetime.datetime.now(tz=pytz.UTC)
     #req.finish_date = None
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
@@ -126,11 +128,11 @@ def decline_accept(request, id):
     try:
         req = Request.objects.filter(id = id, admin_id = admin_id, status = 'в работе')[0]
     except:
-       return  Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match')
+       return  Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match or the admin is not set')
     if status == 'завершён':
         operation_util(req)
     req.status = status
-    req.finish_date = datetime.datetime.now().astimezone()
+    req.finish_date = datetime.datetime.now(tz=pytz.UTC)
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
   

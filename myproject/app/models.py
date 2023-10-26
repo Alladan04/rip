@@ -9,8 +9,8 @@ from django.db import models
 
 
 class OperationRequest(models.Model):
-    operation = models.ForeignKey('Operation', models.DO_NOTHING, blank=True, null=True)
-    request = models.ForeignKey('Request', models.DO_NOTHING, blank=True, null=True)
+    operation = models.ForeignKey('Operation', models.DO_NOTHING, blank=False, null=False)
+    request = models.ForeignKey('Request', models.DO_NOTHING, blank=False, null=False)
     operand1 = models.IntegerField(blank=True)
     operand2 = models.IntegerField(blank=True)
     result = models.IntegerField(blank = True)
@@ -27,7 +27,7 @@ class Operation(models.Model):
     type = models.CharField(max_length = 30, blank=True, null=True)  # This field type is a guess.
     #price = models.FloatField(blank=True, null=True)  # This field type is a guess.
     description = models.TextField(blank=True, null=True)
-    img_src = models.CharField(max_length=200, blank = True, null = True)
+    img=models.CharField(max_length=30, blank = True, null = True) #models.ImageField(upload_to='uploads/')   
 
     class Meta:
         managed = False

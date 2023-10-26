@@ -31,14 +31,21 @@ class OperationRequestView(APIView):
             return Response(status = 400, data = 'Bad request. Probably the id you are referring to does not exist')
         return Response (status = 400, data = 'lol')
     def put(self, request, id): #change operands
+        '''если подать ИД заявки, которая уже в работе/удалена/завершена/отменена, то вернет 400
+        если подать невалидное тело запроса, вернет 400, 
+        если подать ИД м-м, который не существует,то вернет 400
+        иначе изменит операнд и вернет новое значение м-м'''
         try:
             try:
-               operation_r = OperationRequest.objects.filter(id=id,status = 'введён')[0]
+               operation_r = OperationRequest.objects.filter(id=id)[0]
             except:
                return Response(status = r_status.HTTP_404_NOT_FOUND)
-            serializer = OperationRequestSerializer(operation_r, data = request.data['data'], partial = True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response({'data':serializer.data})
+            if operation_r.request.status =='введён':
+                serializer = OperationRequestSerializer(operation_r, data = request.data['data'], partial = True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response({'data':serializer.data})
+            else:
+                return Response(status = r_status.HTTP_400_BAD_REQUEST, data = "Probably the request you are referring to is in the wrong status")
         except:
             return Response(status = 400, data = 'Bad request. Probably wrong request body or id')
