@@ -15,6 +15,7 @@ from rest_framework.decorators import api_view
 from  rest_framework.exceptions import bad_request
 import requests as python_requests
 import json
+import random
 from rest_framework import status as r_status
 from .conf import HOST, PORT,BUCKET, BASE_IMG
 from ..minio.MinioClass import MinioClass
@@ -67,10 +68,16 @@ class OperationListView(APIView):
             #тут если приложил картинку то обязательно нужно приложить и ее название с расширением
             #try:
                 serializer = OperationSerializer(data= request.data['data'])
+                
+                keys = request.data['data'].keys()
+                if ('image' in keys and 'img' in keys):
+                    postImage(request, img_name = request.data['data']['img'])
+                elif 'image' in keys:
+                    img =f"img_{datetime.datetime.now()}.png"
+                    postImage(request, img_name =img ) 
+                    serializer.img = img
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
-                if ('image' in request.data['data'].keys()):
-                    postImage(request, img_name = request.data['data']['img'])
             #TODO: save picture to minio and the picture name to database in operations.img field
             #if no imgae is attached then use the basic picture
             #if no name is attached then generate new name OR return an error (2-ND VARIANT MAY BE BETTER)
@@ -132,13 +139,21 @@ class OperationView(APIView):
             было бы классно добавить здесь ограничение на поля, которые можно менять
             например, статус этой функцией менять должно быть нельзя'''
             operation = Operation.objects.filter(id=id)[0]
+            
+            req_data_keys = request.data['data'].keys()
+            if 'image' in req_data_keys and 'img' in req_data_keys:
+                putImage(request=request, img_name = request.data['data']['img'])
+            elif 'image' in req_data_keys:
+                if operation.img:
+                    putImage(request=request, img_name=operation.img)
+                else:
+                    img =f"img_{datetime.datetime.now()}.png"
+                    putImage(request=request, img_name = img)
+                    operation.img = img
             serializer = OperationSerializer(operation, data = request.data['data'], partial = True)
             serializer.is_valid(raise_exception=True)
             #TODO: save the image to minio if it is in the request (check boris)
             serializer.save()
-            req_data_keys = request.data['data'].keys()
-            if 'image' in req_data_keys and 'img' in req_data_keys:
-                postImage(request=request, img_name = request.data['data']['img'])
             return_data = python_requests.get('http://'+HOST+PORT+'operation/{id_}/'.format (id_ = id))
             return Response(status=200, data = return_data.json())
        

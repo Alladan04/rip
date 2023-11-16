@@ -126,12 +126,13 @@ def decline_accept(request, id):
     if not status in ['отменён', 'завершён']:
         return Response(status = r_status.HTTP_400_BAD_REQUEST)
     try:
-        req = Request.objects.filter(id = id, admin_id = admin_id, status = 'в работе')[0]
+        req = Request.objects.filter(id = id, status = 'в работе')[0]
     except:
        return  Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match or the admin is not set')
     if status == 'завершён':
         operation_util(req)
     req.status = status
+    req.admin_id = admin_id
     req.finish_date = datetime.datetime.now(tz=pytz.UTC)
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
