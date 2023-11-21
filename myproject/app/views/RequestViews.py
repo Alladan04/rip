@@ -28,15 +28,7 @@ class RequestListView(APIView):
         status_list=статус1|статус2...и т.д.
         если передан статус, которого не существует, возвращает бэд реквест'''
         user_id = get_us_id()
-        '''   try:
-            status_list = request.query_params['status_list']
-        except:
-            status_list = []
-        if (len(status_list) ==0):
-            requests = Request.objects.filter(user_id=user_id)
-        else:
-            status_list =status_list.split('|')
-            requests = Request.objects.filter(user_id = user_id, status__in = status_list) '''
+       
         requests = RequestFilter(Request.objects,request, user_id)
         try:
             serialized_list = [RequestSerializer(request).data for request in requests]

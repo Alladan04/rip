@@ -49,6 +49,9 @@ class OperationListView(APIView):
             input_text = request.query_params['text']
             if input_text:
                 orders = Operation.objects.filter(status = "действует",name__icontains=input_text)
+            else:
+                orders = Operation.objects.filter(status = "действует")
+
         except:
             orders = Operation.objects.filter(status = "действует")
         serialized = [OperationSerializer(order).data for order in orders]
@@ -97,7 +100,7 @@ class OperationView(APIView):
         если нет операции по введенному ИД, то 404
         есл нет поля data в теле запроса, то вернет 400 '''
         user_id =  get_us_id()
-        try:
+        ''' try:
             request_keys = request.data['data'].keys()
         except:
              return Response(status=r_status.HTTP_400_BAD_REQUEST, data = 'incorrect request body')
@@ -109,16 +112,17 @@ class OperationView(APIView):
                 op2 = request.data['data']['operand2']
         else:
                 op2 = 0
+        '''
         try:
             
             req = Request.objects.filter(user = User.objects.get(id = user_id), status='введён')[0]
         except:
             req = Request.objects.create(user= User.objects.get(id = user_id), status = "введён",creation_date =datetime.datetime.now(tz=pytz.UTC))
         try:
-            OperationRequest.objects.create(operation = Operation.objects.get(id = id), request = req, operand1 = op1, operand2 = op2)
+            OperationRequest.objects.create(operation = Operation.objects.get(id = id), request = req)
         except:
              return Response(status=r_status.HTTP_404_NOT_FOUND, data = 'the operation you are referring to does not exist')
-        # сохранить новый оперэйшн-реквест в нашу бд   
+        # сохранить новый оперэйшн-реквест в нашу бд   '''
         data = python_requests.get('http://'+HOST+PORT+'request/{id}'.format(id = req.id))
         return Response(status=200, data = data.json())
     

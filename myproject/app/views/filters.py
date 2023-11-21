@@ -22,7 +22,7 @@ def StatusFilter(objects, request,user_id):
      except:
             status_list = []
      if (len(status_list) ==0):
-          return( objects.filter(user_id=user_id).exclude(status = 'удалён'))
+          return( objects.filter(user_id=user_id).exclude(status__in= ['удалён','введён']))
      status_list =status_list.split('|')
      return (objects.filter(user_id = user_id, status__in = status_list) )
     

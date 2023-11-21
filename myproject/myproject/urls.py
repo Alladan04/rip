@@ -36,11 +36,3 @@ urlpatterns = [
     path(r'request/operation/<int:id>/', OpReqViews.OperationRequestView.as_view(), name = 'operation_request_url'),
 
 ]
-'''  path(r'operation/', views.OperationListView.as_view(), name = 'operation_list_url'),
-   # path(r'add/<int:id>', views.update_request, name = 'update_request_url'),
-    path(r'request/', views.RequestListView.as_view(), name = 'request_list_url'),
-    path (r'request/<int:id>/', views.RequestView.as_view(), name = 'request_url'),
-    path(r'request/operation/<int:id>/', views.OperationRequestView.as_view(), name = 'operation_request_url'),
-    path(r'request/form/<int:id>/', views.form, name = 'form_request_url'),
-    path(r'request/finish/<int:id>/', views.decline_accept, name = 'finish_url')
-    '''
