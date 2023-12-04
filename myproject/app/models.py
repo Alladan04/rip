@@ -6,18 +6,31 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin,UserManager
 
 
-class OperationRequest(models.Model):
-    operation = models.ForeignKey('Operation', models.DO_NOTHING, blank=False, null=False)
-    request = models.ForeignKey('Request', models.DO_NOTHING, blank=False, null=False)
-    operand1 = models.IntegerField(blank=True)
-    operand2 = models.IntegerField(blank=True)
-    result = models.IntegerField(blank = True)
 
-    class Meta:
-        managed = False
-        db_table = 'operation_request'
+class UserManager(UserManager):
+     def create_user(self,email,password=None, **extra_fields):
+        if not email:
+            raise ValueError('User must have an email address')
+        
+        email = self.normalize_email(email) 
+        user = self.model(email=email, **extra_fields) 
+        user.set_password(password)
+        user.save(using=self.db)
+        return user
+
+class UserProfile(AbstractBaseUser,PermissionsMixin):
+    name = models.CharField(max_length=30, blank=True, null=True)
+    password = models.CharField(max_length=500, blank=True, null=True)
+    email = models.CharField(max_length=30, blank=True, null=True, unique = True)
+    is_staff = models.BooleanField(default = False)
+    username = models.CharField(max_length=30, blank = True, null = True, unique = True)
+    USERNAME_FIELD = 'username'
+    objects =  UserManager()
+    
+   
 
 
 class Operation(models.Model):
@@ -25,35 +38,36 @@ class Operation(models.Model):
     name = models.CharField(max_length=30, blank=True, null=True)
     status = models.CharField(max_length =30, blank=True, null=True)  # This field type is a guess.
     type = models.CharField(max_length = 30, blank=True, null=True)  # This field type is a guess.
-    #price = models.FloatField(blank=True, null=True)  # This field type is a guess.
+    price = models.FloatField(blank=True, null=True)  # This field type is a guess.
     description = models.TextField(blank=True, null=True)
     img=models.CharField(max_length=30, blank = True, null = True) #models.ImageField(upload_to='uploads/')   
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'operations'
 
 
 class Request(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)##new field 20/10
-    user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=False)
+    user = models.ForeignKey('UserProfile', models.DO_NOTHING, blank=True, null=True)
     status = models.TextField(blank=True, null=True)  # This field type is a guess.
     creation_date = models.DateTimeField(blank=True, null=True)
     form_date = models.DateTimeField(blank=True, null=True)
     finish_date = models.DateTimeField(blank=True, null=True)
-    admin = models.ForeignKey('User', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
+    admin = models.ForeignKey('UserProfile', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'requests'
 
 
-class User(models.Model):
-    name = models.CharField(max_length=30, blank=True, null=True)
-    password = models.CharField(max_length=30, blank=True, null=True)
-    email = models.CharField(max_length=30, blank=True, null=True)
-    is_admin = models.BooleanField(blank=True, null=True)
+class OperationRequest(models.Model):
+    operation = models.ForeignKey('Operation', models.DO_NOTHING, blank=True, null=True)
+    request = models.ForeignKey('Request', models.DO_NOTHING, blank=True, null=True)
+    operand1 = models.IntegerField(blank=True)
+    operand2 = models.IntegerField(blank=True)
+    result = models.IntegerField(blank = True)
 
     class Meta:
-        managed = False
-        db_table = 'users'
+        managed=True
+        db_table = 'operation_request'

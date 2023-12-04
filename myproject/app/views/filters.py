@@ -16,17 +16,17 @@ def DateFilter(objects, request):
         higherdate = datetime.strptime(request.query_params.get('update'), '%Y-%m-%d|%H:%M:%S')
     return objects.filter(creation_date__gte = lowerdate, creation_date__lte = higherdate)
 
-def StatusFilter(objects, request,user_id):
+def StatusFilter(objects, request):
      try:
           status_list = request.query_params['status_list']
      except:
             status_list = []
      if (len(status_list) ==0):
-          return( objects.filter(user_id=user_id).exclude(status__in= ['удалён','введён']))
+          return( objects.all().exclude(status__in= ['удалён','введён']))
      status_list =status_list.split('|')
-     return (objects.filter(user_id = user_id, status__in = status_list) )
+     return (objects.filter( status__in = status_list) )
     
 
 
-def RequestFilter(objects, request,user_id):
-    return DateFilter(StatusFilter(objects,request,user_id),request)
+def RequestFilter(objects, request):
+    return DateFilter(StatusFilter(objects,request),request)

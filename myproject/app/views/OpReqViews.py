@@ -4,8 +4,8 @@ from django.urls import reverse
 import psycopg2
 from datetime import date
 from django.http import UnreadablePostError
-from ..serializers import OperationSerializer,UserSerializer, OperationRequestSerializer,RequestSerializer
-from ..models import Operation,User,OperationRequest,Request
+from ..serializers import  OperationRequestSerializer
+from ..models import Operation,OperationRequest,Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
@@ -15,7 +15,7 @@ from  rest_framework.exceptions import bad_request
 import requests as python_requests
 import json
 from rest_framework import status as r_status
-
+from drf_yasg.utils import swagger_auto_schema
 class OperationRequestView(APIView):
     def delete(self, request, id):
         #ТУТ наверно стоит вернуть гет из Реквест по реквест_ид из м-м
@@ -30,6 +30,7 @@ class OperationRequestView(APIView):
         except:
             return Response(status = 400, data = 'Bad request. Probably the id you are referring to does not exist')
         return Response (status = 400, data = 'lol')
+    @swagger_auto_schema(request_body=OperationRequestSerializer)
     def put(self, request, id): #change operands
         '''если подать ИД заявки, которая уже в работе/удалена/завершена/отменена, то вернет 400
         если подать невалидное тело запроса, вернет 400, 

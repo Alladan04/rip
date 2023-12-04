@@ -4,8 +4,8 @@ from django.urls import reverse
 import psycopg2
 from datetime import date
 from django.http import UnreadablePostError
-from ..serializers import OperationSerializer,UserSerializer, OperationRequestSerializer,RequestSerializer
-from ..models import Operation,User,OperationRequest,Request
+from ..serializers import OperationSerializer, OperationRequestSerializer,RequestSerializer
+from ..models import Operation,OperationRequest,Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
@@ -16,11 +16,14 @@ import requests as python_requests
 import json
 from rest_framework import status as r_status
 from .filters import RequestFilter
+from drf_yasg.utils import swagger_auto_schema
 import pytz
 def get_us_id():
      return 1
 def get_adm_id():
     return 2
+def getUsername(id):
+    return "allochka"
 class RequestListView(APIView):
     def get(self, request, format = None):
         '''по юзер_ид выдает список заявок, есть фильтрация по статусу заявки.
@@ -29,9 +32,13 @@ class RequestListView(APIView):
         если передан статус, которого не существует, возвращает бэд реквест'''
         user_id = get_us_id()
        
-        requests = RequestFilter(Request.objects,request, user_id)
+        requests = RequestFilter(Request.objects,request)
         try:
             serialized_list = [RequestSerializer(request).data for request in requests]
+            plus_user = [{"item":item, "user":"allochka"} for item in serialized_list]
+            for item in serialized_list:
+                item["user"]= getUsername(item["user"])
+            #serialized_list = [request["username"] = getUsername(request["user_id"]) for request in serialized_list]
             return Response(data= {'data':serialized_list})
         except:
             return Response( status = 400, data = "Bad Request")
@@ -70,18 +77,17 @@ class RequestView(APIView):
             return Response(status = r_status.HTTP_200_OK, data = 'Deleted request #{n} '.format(n = id))
         except:
             return Response(status = 400, data = 'Bad request. Probably the request you are referring to does not exist')
-        
+@swagger_auto_schema(method='put', request_body= RequestSerializer)   
 @api_view(['Put'])
 def form(request, id):
     user_id = get_us_id()
-    #тут менять по ИД заявки или по ИД юзера?
+    #тут менять по ИД заявки
     try:
         req = Request.objects.filter(id = id, user_id = user_id, status = 'введён')[0]
     except:
         return Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match')
     req.status = 'в работе'
     req.form_date = datetime.datetime.now(tz=pytz.UTC)
-    #req.finish_date = None
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
 
@@ -90,6 +96,10 @@ def operation_util( req: Request):
     for i in item:
         a = i.operand1
         b = i.operand2
+        if (a == None):
+            a = 0
+        if (b== None):
+            b = 0
         match i.operation.id:
             case 1:
                 i.result = a|b
@@ -106,7 +116,7 @@ def operation_util( req: Request):
         i.save()
     return req
             
-
+@swagger_auto_schema(method = 'put',request_body=RequestSerializer)
 @api_view(['Put'])
 def decline_accept(request, id):
     admin_id = get_adm_id()
