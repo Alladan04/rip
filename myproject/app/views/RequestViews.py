@@ -8,7 +8,10 @@ from ..serializers import OperationSerializer, OperationRequestSerializer,Reques
 from ..models import Operation,OperationRequest,Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import authentication, permissions
+from rest_framework import authentication, permissions as rest_permissions
+from myproject.permissions import *
+from myproject.settings import REDIS_HOST, REDIS_PORT
+import redis
 import datetime
 from rest_framework.decorators import api_view
 from  rest_framework.exceptions import bad_request
@@ -17,13 +20,14 @@ import json
 from rest_framework import status as r_status
 from .filters import RequestFilter
 from drf_yasg.utils import swagger_auto_schema
+from .utils import get_us_id, operation_util
 import pytz
-def get_us_id():
-     return 1
+#session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+
 def get_adm_id():
     return 2
 def getUsername(id):
-    return "allochka"
+    return UserProfile.get(id = id).username
 class RequestListView(APIView):
     def get(self, request, format = None):
         '''по юзер_ид выдает список заявок, есть фильтрация по статусу заявки.
@@ -44,15 +48,33 @@ class RequestListView(APIView):
             return Response( status = 400, data = "Bad Request")
    
 class RequestView(APIView):
+    permission_classes = [rest_permissions.IsAuthenticated]
     def get (self, request,id):
-        ''' возвращает заявку по ИД вместе со всеми услугами, которые в нее включены и их подробной информацией
+        ''' 
+        Просмотр одной заявки, доступно только авторизованным пользователям
+        возвращает заявку по ИД вместе со всеми услугами, которые в нее включены и их подробной информацией
         (возможно, это избыточно, и было бы достаточно вернуть элемент из м-м, ссылающийся на саму услугу по ключу)
         Если введен ИД несуществующей заявки, возвращает бэд реквест'''
-        try:
-            ob_request = Request.objects.filter(id = id)[0]
+        '''try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=r_status.HTTP_403_FORBIDDEN)
+        user = UserProfile.objects.get(username = session_storage.get(ssid).decode('utf-8'))'''
+        user = get_us_id(request=request)
+        if not user.is_staff and not user.is_superuser:
+            ob_request = Request.objects.filter(id = id, user = user)
+            if ob_request.exists():
+                opreqs = OperationRequest.objects.filter(request = ob_request[0])
+            else:
+                return Response(status = r_status.HTTP_404_NOT_FOUND)
+        else:    
+            ob_request = Request.objects.filter(id = id)
+            if ob_request.exists():
+                ob_request=ob_request[0]
+            else:
+                return Response(status = r_status.HTTP_404_NOT_FOUND)
             opreqs= OperationRequest.objects.filter(request = ob_request)
-            #operations = [opreq.operation for opreq in opreqs]
-            #serialized_operations = [OperationSerializer(operation).data for operation in operations]
+        try:
             serialized_opreq = [OperationRequestSerializer(opreq).data for opreq in opreqs]
             for i in serialized_opreq:
                 i['operation'] = OperationSerializer(Operation.objects.get(id = i['operation'])).data
@@ -61,12 +83,14 @@ class RequestView(APIView):
         except:
             return Response(status=400, data = "Bad Request. Probably the request you are referring to does not exist") 
     def delete(self,request,id):
-        ''' меняет статус выбранной заявки текущего юзера на удалён
+        '''
+        Удалить заявку, доступно только авторизованным пользователям.
+        меняет статус выбранной заявки текущего юзера на удалён
         потом удаляет все связанные элементы из м-м физически
         если подали ИД который не существует, возвращает бэд реквест'''
         try:
-            user_id = get_us_id()
-            ob_request = Request.objects.filter(id =id, user_id = user_id)[0]
+            user_id = get_us_id(request=request) #get_us_id()
+            ob_request = Request.objects.filter(id =id, user = user_id)[0]
             ob_request.status = 'удалён'
             ob_request.finish_date = datetime.datetime.now(tz=pytz.UTC)
             ob_request.save()
@@ -77,13 +101,15 @@ class RequestView(APIView):
             return Response(status = r_status.HTTP_200_OK, data = 'Deleted request #{n} '.format(n = id))
         except:
             return Response(status = 400, data = 'Bad request. Probably the request you are referring to does not exist')
+
+
 @swagger_auto_schema(method='put', request_body= RequestSerializer)   
 @api_view(['Put'])
 def form(request, id):
-    user_id = get_us_id()
+    user_id = get_us_id(request=request)
     #тут менять по ИД заявки
     try:
-        req = Request.objects.filter(id = id, user_id = user_id, status = 'введён')[0]
+        req = Request.objects.filter(id = id, user = user_id, status = 'введён')[0]
     except:
         return Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match')
     req.status = 'в работе'
@@ -91,35 +117,15 @@ def form(request, id):
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
 
-def operation_util( req: Request):
-    item = OperationRequest.objects.filter(request = req)
-    for i in item:
-        a = i.operand1
-        b = i.operand2
-        if (a == None):
-            a = 0
-        if (b== None):
-            b = 0
-        match i.operation.id:
-            case 1:
-                i.result = a|b
-            case 2:
-                i.result = a&b
-            case 3:
-                i.result = a^b
-            case 4:
-                i.result = ~(a|b)
-            case 5:
-                i.result = ~(a&b)
-            case 6:
-                i.result = ~a
-        i.save()
-    return req
-            
+
+@method_permission_classes(IsManager)          
 @swagger_auto_schema(method = 'put',request_body=RequestSerializer)
 @api_view(['Put'])
 def decline_accept(request, id):
-    admin_id = get_adm_id()
+    '''
+    Завершение заявки (выполнение или отклонение).Доступно только авторизованному модератору.
+    '''
+    admin_id = get_us_id() #get_adm_id()
     #тут менять по ИД заявки или по ИД юзера?\
     try:
         status= request.data['data']['status']
@@ -134,7 +140,7 @@ def decline_accept(request, id):
     if status == 'завершён':
         operation_util(req)
     req.status = status
-    req.admin_id = admin_id
+    req.admin= admin_id
     req.finish_date = datetime.datetime.now(tz=pytz.UTC)
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})

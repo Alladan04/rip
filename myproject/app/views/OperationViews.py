@@ -9,7 +9,10 @@ from ..serializers import OperationSerializer
 from ..models import Operation,OperationRequest,Request, UserProfile
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import authentication, permissions
+from rest_framework import authentication
+from rest_framework import permissions as rest_permissions
+from rest_framework.decorators import permission_classes, authentication_classes, api_view
+from myproject.permissions import *
 import datetime
 from rest_framework.decorators import api_view
 from  rest_framework.exceptions import bad_request
@@ -22,11 +25,12 @@ from ..minio.MinioClass import MinioClass
 from drf_yasg.utils import swagger_auto_schema
 from ..schemas.OrderSchemas import OrderListSchema
 from drf_yasg import openapi
+
 def get_us_id():
      return 1
 def get_adm_id():
     return 2
-
+session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 def getImage(img_name:str):
     minio = MinioClass()
     #FineData = serializer.data
@@ -45,8 +49,13 @@ def putImage(request:Request, img_name:str):
     minio.addImage(buck_name=BUCKET, image_base64=request.data['image'], object_name=img_name)
    
 class OperationListView(APIView):
+    permission_classes = [rest_permissions.IsAuthenticatedOrReadOnly]
     def get(self, request):
-        user_id = get_us_id()
+        try:
+            ssid = request.COOKIES["session_id"]
+            user_id = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8')).id
+        except:
+            user_id = -1
         try:
             input_text = request.query_params['text']
             if input_text:
@@ -68,13 +77,12 @@ class OperationListView(APIView):
         else: 
             req_id = None
         return Response({'data': serialized, 'request_id':req_id})
-   
+    @method_permission_classes((IsManager,))
     @swagger_auto_schema(request_body=OperationSerializer)
-    def post(self, request):#добавление услуги
-            #тут если приложил картинку то обязательно нужно приложить и ее название с расширением
-            #try:
-                serializer = OperationSerializer(data= request.data)
+    def post(self, request):
+                '''Добавление новой услуги в список услуг, доступно только модераторам'''
                 
+                serializer = OperationSerializer(data = request.data)
                 keys = request.data.keys()
                 if ('image' in keys and 'img' in keys):
                     postImage(request, img_name = request.data['img'])
@@ -82,22 +90,30 @@ class OperationListView(APIView):
                     img =f"img_{datetime.datetime.now()}.png"
                     postImage(request, img_name =img ) 
                     serializer.img = img
-                else:
-                     return Response(status =r_status.HTTP_400_BAD_REQUEST )
+                #else:
+                #    return Response(status =r_status.HTTP_400_BAD_REQUEST )
+                if serializer.is_valid():
+                     serializer.save()
             #if no name is attached then generate new name OR return an error (2-ND VARIANT MAY BE BETTER)
                 return_data = python_requests.get('http://'+HOST+PORT+'operation/')
                 return Response(status=200, data = return_data.json())
 
 class OperationView(APIView):
-    
-    def post(self, request, id):#Добавление услуги в заявку?
-        '''возвращает созданную/найденную заявку с полным списком услуг
+    permission_classes=[rest_permissions.IsAuthenticatedOrReadOnly]
+
+    def post(self, request, id):
+        '''
+        Добавление услуги в заявку. Доступно только авторизованным пользователям
+        возвращает созданную/найденную заявку с полным списком услуг
         если один операнд в теле запроса, то второй автоматически =0
         если нет операндов в теле запроса или их названия переданы неправильно, то оба = 0
         если нет операции по введенному ИД, то 404
         есл нет поля data в теле запроса, то вернет 400 '''
-        user_id =  get_us_id()
-      
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=r_status.HTTP_403_FORBIDDEN)
+        user_id = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8')).id
         try:
             
             req = Request.objects.filter(user = UserProfile.objects.get(id = user_id), status='введён')[0]
@@ -123,9 +139,11 @@ class OperationView(APIView):
         serializer.data["image"] = image
         return Response({'data':serializer.data, "image":image})
     
+    @method_permission_classes((IsManager,))
     @swagger_auto_schema(request_body=OperationSerializer)
     def put(self, request,id):
-            '''возвращяет измененную операцию
+            '''
+            Изменение услуги (операции), доступно только модераторам
             было бы классно добавить здесь ограничение на поля, которые можно менять
             например, статус этой функцией менять должно быть нельзя'''
             operation = Operation.objects.filter(id=id)[0]
@@ -146,9 +164,12 @@ class OperationView(APIView):
             serializer.save()
             return_data = python_requests.get('http://'+HOST+PORT+'operation/{id_}/'.format (id_ = id))
             return Response(status=200, data = return_data.json())
-       
+    
+    @method_permission_classes((IsManager,))
     def delete(self, request, id):
-        '''делает ТОЛЬКО логическое удаление операции из бд.
+        '''
+        Удаление услуги. Доступно только модераторам
+        делает ТОЛЬКО логическое удаление операции из бд.
         картинка изз минио не удаляется тоже'''
         #query = "UPDATE operations SET status = 'удален' WHERE id = {id_}".format(id_= id)#change this to ORM!!!
         operation = Operation.objects.get(id = id)

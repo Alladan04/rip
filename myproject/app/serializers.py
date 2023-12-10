@@ -35,7 +35,7 @@ class OperationRequestSerializer (serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['password', 'is_staff', 'username', 'email', 'id']
+        fields = ['password', 'is_staff', 'username', 'email', 'id', 'is_superuser']
 
 
 '''

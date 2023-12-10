@@ -18,7 +18,7 @@ class IsManager(BasePermission):
         
         user = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8'))
         return  user.is_staff
-'''
+
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
         try:
@@ -28,7 +28,7 @@ class IsAdmin(BasePermission):
         
         user = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8'))
         return user.is_superuser
-'''
+
 
 def method_permission_classes(classes):
     def decorator(func):
