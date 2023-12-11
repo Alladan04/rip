@@ -22,21 +22,23 @@ from .filters import RequestFilter
 from drf_yasg.utils import swagger_auto_schema
 from .utils import get_us_id, operation_util
 import pytz
+from django.views.decorators.csrf import csrf_exempt
 #session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 
 def get_adm_id():
     return 2
 def getUsername(id):
-    return UserProfile.get(id = id).username
+    return UserProfile.objects.get(id = id).username
 class RequestListView(APIView):
+    permission_classes=[rest_permissions.IsAuthenticated]
     def get(self, request, format = None):
         '''по юзер_ид выдает список заявок, есть фильтрация по статусу заявки.
         фильтры устанавливаются в квери параметрах урла в виде
         status_list=статус1|статус2...и т.д.
         если передан статус, которого не существует, возвращает бэд реквест'''
-        user_id = get_us_id()
-       
-        requests = RequestFilter(Request.objects,request)
+        user_id = get_us_id(request=request).id
+        user = UserProfile.objects.get(id = user_id)
+        requests = RequestFilter(Request.objects,request, user)
         try:
             serialized_list = [RequestSerializer(request).data for request in requests]
             plus_user = [{"item":item, "user":"allochka"} for item in serialized_list]
@@ -49,6 +51,7 @@ class RequestListView(APIView):
    
 class RequestView(APIView):
     permission_classes = [rest_permissions.IsAuthenticated]
+     
     def get (self, request,id):
         ''' 
         Просмотр одной заявки, доступно только авторизованным пользователям
@@ -78,7 +81,7 @@ class RequestView(APIView):
             serialized_opreq = [OperationRequestSerializer(opreq).data for opreq in opreqs]
             for i in serialized_opreq:
                 i['operation'] = OperationSerializer(Operation.objects.get(id = i['operation'])).data
-            serialized_request= RequestSerializer(ob_request).data
+            serialized_request= RequestSerializer(ob_request[0]).data
             return Response(data = {'data':{'request':serialized_request, 'items':serialized_opreq}})#'operations':serialized_operations}})
         except:
             return Response(status=400, data = "Bad Request. Probably the request you are referring to does not exist") 
@@ -101,6 +104,30 @@ class RequestView(APIView):
             return Response(status = r_status.HTTP_200_OK, data = 'Deleted request #{n} '.format(n = id))
         except:
             return Response(status = 400, data = 'Bad request. Probably the request you are referring to does not exist')
+    def put(self,request, id):
+        '''
+        Завершение заявки (выполнение или отклонение).Доступно только авторизованному модератору.
+        '''
+        admin_id = get_us_id(request) #get_adm_id()
+        #тут менять по ИД заявки или по ИД юзера?\
+        try:
+            status= request.data['data']['status']
+        except:
+            return Response(status = r_status.HTTP_400_BAD_REQUEST)
+        if not status in ['отменён', 'завершён']:
+            return Response(status = r_status.HTTP_400_BAD_REQUEST)
+        try:
+            req = Request.objects.filter(id = id, status = 'в работе')[0]
+        except:
+            return  Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match or the admin is not set')
+        if status == 'завершён':
+            operation_util(req)
+        req.status = status
+        req.admin= admin_id
+        req.finish_date = datetime.datetime.now(tz=pytz.UTC)
+        req.save()
+        return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
+    
 
 
 @swagger_auto_schema(method='put', request_body= RequestSerializer)   
@@ -111,21 +138,21 @@ def form(request, id):
     try:
         req = Request.objects.filter(id = id, user = user_id, status = 'введён')[0]
     except:
-        return Response(status = r_status.HTTP_404_NOT_FOUND, data = 'no such id or the status does not match')
+        return Response(status = r_status.HTTP_403_FORBIDDEN, data = 'Something got wrong')
     req.status = 'в работе'
     req.form_date = datetime.datetime.now(tz=pytz.UTC)
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
 
 
+
+'''
 @method_permission_classes(IsManager)          
 @swagger_auto_schema(method = 'put',request_body=RequestSerializer)
 @api_view(['Put'])
 def decline_accept(request, id):
-    '''
-    Завершение заявки (выполнение или отклонение).Доступно только авторизованному модератору.
-    '''
-    admin_id = get_us_id() #get_adm_id()
+    
+    admin_id = get_us_id(request) #get_adm_id()
     #тут менять по ИД заявки или по ИД юзера?\
     try:
         status= request.data['data']['status']
@@ -145,3 +172,4 @@ def decline_accept(request, id):
     req.save()
     return Response(status = r_status.HTTP_200_OK, data ={'data': RequestSerializer(req).data})
   
+'''

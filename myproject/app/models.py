@@ -30,6 +30,8 @@ class UserProfile(AbstractBaseUser,PermissionsMixin):
     username = models.CharField(max_length=30, blank = True, null = True, unique = True)
     USERNAME_FIELD = 'username'
     objects =  UserManager()
+    def __str__(self):
+            return f"{self.username} | {self.id}" or ''
     
    
 
@@ -56,18 +58,20 @@ class Request(models.Model):
     form_date = models.DateTimeField(blank=True, null=True)
     finish_date = models.DateTimeField(blank=True, null=True)
     admin = models.ForeignKey('UserProfile', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
-
+    def __str__(self):
+            return f"Request #{self.id}" or ''
     class Meta:
         managed = True
         db_table = 'requests'
+        
 
 
 class OperationRequest(models.Model):
     operation = models.ForeignKey('Operation', models.DO_NOTHING, blank=True, null=True)
     request = models.ForeignKey('Request', models.DO_NOTHING, blank=True, null=True)
-    operand1 = models.IntegerField(blank=True)
-    operand2 = models.IntegerField(blank=True)
-    result = models.IntegerField(blank = True)
+    operand1 = models.IntegerField(blank=True,null = True)
+    operand2 = models.IntegerField(blank=True, null = True)
+    result = models.IntegerField(blank = True, null = True)
 
     class Meta:
         managed=True

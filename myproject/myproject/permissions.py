@@ -17,7 +17,7 @@ class IsManager(BasePermission):
             return False
         
         user = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8'))
-        return  user.is_staff
+        return  user.is_staff or user.is_superuser
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):

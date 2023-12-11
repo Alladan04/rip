@@ -2,13 +2,13 @@ from .models import Operation, Request, OperationRequest,UserProfile
 from rest_framework import serializers
 from collections import OrderedDict
 class OperationSerializer(serializers.ModelSerializer):
-    image = serializers.CharField(default = "")
+    #image = serializers.CharField(default = "")
     class Meta:
        
         # Модель, которую мы сериализуем
         model = Operation
         # Поля, которые мы сериализуем
-        fields = ["name", "status", "type", "description","pk","img", "image"]
+        fields = ["name", "status", "type", "description","pk","img"]
         def get_fields(self):
             new_fields = OrderedDict()
             for name, field in super().get_fields().items():

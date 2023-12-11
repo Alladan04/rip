@@ -42,13 +42,18 @@ class UserViewSet(viewsets.ModelViewSet):
     model_class = UserProfile
 
     def get_permissions(self):
+    
         if self.action in ['create']:
             permission_classes = [AllowAny]
         elif self.action in ['list']:
             permission_classes = [IsManager]
        
         return [permission() for permission in permission_classes]
-    
+    def get(self, request):
+        '''Только ддля тестирования'''
+        users = UserProfile.all()
+        serialized_data= UserSerializer(users,many = True)
+        return Response(status=200, data =serialized_data )
     def create(self, request):
         """
         Функция регистрации новых пользователей
@@ -93,7 +98,7 @@ def login_view(request):
     username= request.data["username"]
     password = request.data["password"]
     #print(UserProfile.objects.all()[0])
-    user = authenticate(request, username=username, password=password)
+    user = authenticate(request, username=username, password=password)#ходит в бдшку  и чекает
     if user is not None:
         random_key = str(uuid.uuid4())
         session_storage.set(random_key, username)
