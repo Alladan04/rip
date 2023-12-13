@@ -126,13 +126,13 @@ class OperationView(APIView):
      
     def get(self, request, id):
         order = Operation.objects.filter(id = id)[0]
-        serializer = OperationSerializer(order)
-        if serializer.data['img'] ==None:
+        serializer = OperationSerializer(order).data
+        if serializer['img'] ==None:
                 image=getImage(BASE_IMG)
         else:
-               image= getImage(serializer.data['img'])
-        serializer.data["image"] = image
-        return Response({'data':serializer.data, "image":image})
+               image= getImage(serializer['img'])
+        serializer["image"] = image
+        return Response({'data':serializer})
     
     def put(self, request,id):
             '''возвращяет измененную операцию
