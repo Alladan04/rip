@@ -47,11 +47,11 @@ class OperationListView(APIView):
         user_id = get_us_id()
         try:
             input_text = request.query_params['text']
-            if input_text:
-                orders = Operation.objects.filter(status = "действует",name__icontains=input_text)
+            print(input_text)
+            orders = Operation.objects.filter(status = "действует",name__icontains=input_text)
         except:
             orders = Operation.objects.filter(status = "действует")
-        serialized = [OperationSerializer(order).data for order in orders]
+        serialized =OperationSerializer(orders, many = True).data #[OperationSerializer(order).data for order in orders]
         for serialized_item in serialized:
             if serialized_item['img'] ==None:
                 serialized_item['image']=getImage(BASE_IMG)
