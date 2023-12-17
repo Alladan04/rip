@@ -41,7 +41,7 @@ schema_view = get_schema_view(
    public=True,
    permission_classes=(permissions.AllowAny,),
 )
-router.register(r'user', UserViews.UserViewSet, basename='user_url')
+#router.register(r'user', UserViews.UserViewSet, basename='user_url')
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
@@ -56,7 +56,8 @@ urlpatterns = [
     path(r'request/operation/<int:id>/', OpReqViews.OperationRequestView.as_view(), name = 'operation_request_url'),
     path(r'profile/login', UserViews.login_view ,name = 'login_url'),
     path(r'profile/logout',UserViews.logout_view, name = 'logout_url'),
-    path(r'profile/auth',UserViews.check_auth, name = 'signup_url'),
+    #path(r'profile/auth',UserViews.check_auth, name = 'signup_url'),
+   path(r'profile/register',UserViews.UserViewSet.as_view({'post':'create'}), name = 'signup_url'),
 
 
 ]

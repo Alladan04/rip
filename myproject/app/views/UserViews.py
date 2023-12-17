@@ -129,7 +129,8 @@ def login_view(request):
 @permission_classes([AllowAny])
 def logout_view(request):
     try:
-       ssid = request.headers.get("authorization")
+       #ssid = request.headers.get("authorization")
+       ssid = request.COOKIES["session_id"]
        print(ssid)
     except:
         return Response(data = 'logout failed',status = status.HTTP_403_FORBIDDEN)#HttpResponse("{'status': 'error', 'error': 'logout failed'}")

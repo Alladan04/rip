@@ -9,7 +9,7 @@ def get_us_id(request):
         try:
             ssid = request.COOKIES["session_id"]
         except:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return None#Response(status=status.HTTP_403_FORBIDDEN)
 
         return UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8'))
 def operation_util( req: Request):

@@ -36,7 +36,10 @@ class RequestListView(APIView):
         фильтры устанавливаются в квери параметрах урла в виде
         status_list=статус1|статус2...и т.д.
         если передан статус, которого не существует, возвращает бэд реквест'''
-        user_id = get_us_id(request=request).id
+        try:
+            user_id = get_us_id(request=request).id
+        except:
+            return Response(status=r_status.HTTP_401_UNAUTHORIZED)
         user = UserProfile.objects.get(id = user_id)
         requests = RequestFilter(Request.objects,request, user)
         try:
@@ -104,6 +107,8 @@ class RequestView(APIView):
             return Response(status = r_status.HTTP_200_OK, data = 'Deleted request #{n} '.format(n = id))
         except:
             return Response(status = 400, data = 'Bad request. Probably the request you are referring to does not exist')
+        
+    @method_permission_classes((IsManager,))
     def put(self,request, id):
         '''
         Завершение заявки (выполнение или отклонение).Доступно только авторизованному модератору.

@@ -119,9 +119,9 @@ class OperationView(APIView):
         
         try:
             ssid = request.COOKIES["session_id"]
+            user_id = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8')).id
         except:
-            return Response(status=r_status.HTTP_403_FORBIDDEN)
-        user_id = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8')).id
+            return Response(status=r_status.HTTP_401_UNAUTHORIZED)
         try:
             
             req = Request.objects.filter(user = UserProfile.objects.get(id = user_id), status='введён')[0]
