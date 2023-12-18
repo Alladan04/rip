@@ -75,7 +75,7 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def check_auth(request):
-    session_id = request.headers.get("authorization")
+    session_id = request.COOKIES["session_id"]#request.headers.get("authorization")
     print(session_id)
 
     print(session_storage.get(session_id))
@@ -110,7 +110,8 @@ def login_view(request):
             "session_id": random_key,
             "user_id": user.pk,
             "username": user.username,
-            "password":user.password
+            "password":user.password,
+            "is_staff":user.is_staff
         }
 
         response = Response(data, status=status.HTTP_201_CREATED)
