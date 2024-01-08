@@ -29,6 +29,23 @@ class IsAdmin(BasePermission):
         user = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8'))
         return user.is_superuser
 
+class IsAuthenticated(BasePermission):
+       def has_permission(self, request, view):
+        try:
+            ssid = request.COOKIES.get("session_id")
+            if ssid is None:
+                ssid = request.headers.get("authorization")
+            print(request.headers.get("authorization"))
+            if ssid is None:
+                return False
+        except Exception as e:
+            return False
+
+        if session_storage.get(ssid):
+            user = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8'))
+            return user.is_active
+
+        return False
 
 def method_permission_classes(classes):
     def decorator(func):

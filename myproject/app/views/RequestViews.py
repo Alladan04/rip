@@ -23,6 +23,7 @@ from drf_yasg.utils import swagger_auto_schema
 from .utils import get_us_id, operation_util
 import pytz
 from django.views.decorators.csrf import csrf_exempt
+
 #session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 
 def get_adm_id():
@@ -30,7 +31,8 @@ def get_adm_id():
 def getUsername(id):
     return UserProfile.objects.get(id = id).username
 class RequestListView(APIView):
-    permission_classes=[rest_permissions.IsAuthenticated]
+   # permission_classes=[rest_permissions.IsAuthenticated]
+    @method_permission_classes([IsAuthenticated,])
     def get(self, request, format = None):
         '''по юзер_ид выдает список заявок, есть фильтрация по статусу заявки.
         фильтры устанавливаются в квери параметрах урла в виде
@@ -47,14 +49,13 @@ class RequestListView(APIView):
             plus_user = [{"item":item, "user":"allochka"} for item in serialized_list]
             for item in serialized_list:
                 item["user"]= getUsername(item["user"])
-            #serialized_list = [request["username"] = getUsername(request["user_id"]) for request in serialized_list]
             return Response(data= {'data':serialized_list})
         except:
             return Response( status = 400, data = "Bad Request")
    
 class RequestView(APIView):
-    permission_classes = [rest_permissions.IsAuthenticated]
-     
+    #permission_classes = [rest_permissions.IsAuthenticated]
+    @method_permission_classes([IsAuthenticated,])
     def get (self, request,id):
         ''' 
         Просмотр одной заявки, доступно только авторизованным пользователям
@@ -88,6 +89,7 @@ class RequestView(APIView):
             return Response(data = {'data':{'request':serialized_request, 'items':serialized_opreq}})#'operations':serialized_operations}})
         except:
             return Response(status=400, data = "Bad Request. Probably the request you are referring to does not exist") 
+    @method_permission_classes([IsAuthenticated,])
     def delete(self,request,id):
         '''
         Удалить заявку, доступно только авторизованным пользователям.
@@ -135,8 +137,10 @@ class RequestView(APIView):
     
 
 
-@swagger_auto_schema(method='put', request_body= RequestSerializer)   
+@swagger_auto_schema(method='put', request_body= RequestSerializer) 
+ 
 @api_view(['Put'])
+@method_permission_classes([IsAuthenticated,]) 
 def form(request, id):
     user_id = get_us_id(request=request)
     #тут менять по ИД заявки

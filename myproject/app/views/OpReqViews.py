@@ -22,8 +22,8 @@ import redis
 from .utils import get_us_id
 session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 class OperationRequestView(APIView):
-    permission_classes=[rest_permissions.IsAuthenticated]
-
+    #permission_classes=[rest_permissions.IsAuthenticated]
+    @method_permission_classes([IsAuthenticated,])
     def delete(self, request, id):
         '''
         Удалить операцию из заявки, доступно только авторизованным пользователям'''
@@ -54,6 +54,7 @@ class OperationRequestView(APIView):
         return Response (status = 400, data = 'Something went wrong')
     
     @swagger_auto_schema(request_body=OperationRequestSerializer)
+    @method_permission_classes([IsAuthenticated,])
     def put(self, request, id): #change operands
         '''
         Изменение операндов в м-м, доступно только авторзованным пользователям

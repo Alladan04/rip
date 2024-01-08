@@ -53,7 +53,7 @@ def putImage(request:Request, img_name:str):
    
 class OperationListView(APIView):
    # authentication_classes=[SessionAuthentication, BasicAuthentication]
-   # permission_classes = [rest_permissions.IsAuthenticatedOrReadOnly]
+    #permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
             ssid = request.COOKIES["session_id"]
@@ -105,9 +105,9 @@ class OperationListView(APIView):
                 return Response(status=200, data = return_data)
 
 class OperationView(APIView):
-    authentication_classes=[SessionAuthentication, BasicAuthentication]
-    permission_classes=[rest_permissions.IsAuthenticatedOrReadOnly]
-
+   # authentication_classes=[SessionAuthentication, BasicAuthentication]
+    #permission_classes=[rest_permissions.IsAuthenticatedOrReadOnly]
+    @method_permission_classes((IsAuthenticated,))
     def post(self, request, id):
         '''
         Добавление услуги в заявку. Доступно только авторизованным пользователям
@@ -148,7 +148,7 @@ class OperationView(APIView):
         serializer.data["image"] = image
         return Response({'data':serializer.data, "image":image})
     
-    @auth_classes_decorator([SessionAuthentication, BasicAuthentication])
+   # @auth_classes_decorator([SessionAuthentication, BasicAuthentication])
     @method_permission_classes((IsManager,))
     @swagger_auto_schema(request_body=OperationSerializer)
     def put(self, request,id):
@@ -174,7 +174,7 @@ class OperationView(APIView):
             serializer.save()
             return_data = python_requests.get('http://'+HOST+PORT+'operation/{id_}/'.format (id_ = id))
             return Response(status=200, data = return_data.json())
-    @auth_classes_decorator([SessionAuthentication, BasicAuthentication])
+   # @auth_classes_decorator([SessionAuthentication, BasicAuthentication])
     @method_permission_classes((IsManager,))
     def delete(self, request, id):
         '''
