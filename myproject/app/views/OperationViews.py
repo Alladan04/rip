@@ -7,6 +7,7 @@ from django.http import UnreadablePostError
 import pytz
 from ..serializers import OperationSerializer, RequestSerializer
 from ..models import Operation,OperationRequest,Request, UserProfile
+from .utils import get_session
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import authentication
@@ -56,7 +57,7 @@ class OperationListView(APIView):
    # permission_classes = [rest_permissions.IsAuthenticatedOrReadOnly]
     def get(self, request):
         try:
-            ssid = request.COOKIES["session_id"]
+            ssid = get_session(request=request) # request.COOKIES["session_id"]
             user_id = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8')).id
         except:
             user_id = -1
@@ -105,9 +106,9 @@ class OperationListView(APIView):
                 return Response(status=200, data = return_data)
 
 class OperationView(APIView):
-    authentication_classes=[SessionAuthentication, BasicAuthentication]
-    permission_classes=[rest_permissions.IsAuthenticatedOrReadOnly]
-
+  #  authentication_classes=[SessionAuthentication, BasicAuthentication]
+   # permission_classes=[rest_permissions.IsAuthenticatedOrReadOnly]
+    @method_permission_classes([IsAuthenticated,])
     def post(self, request, id):
         '''
         Добавление услуги в заявку. Доступно только авторизованным пользователям
@@ -118,7 +119,7 @@ class OperationView(APIView):
         есл нет поля data в теле запроса, то вернет 400 '''
         
         try:
-            ssid = request.COOKIES["session_id"]
+            ssid = get_session(request=request)#request.COOKIES["session_id"]
             user_id = UserProfile.objects.get(username=session_storage.get(ssid).decode('utf-8')).id
         except:
             return Response(status=r_status.HTTP_401_UNAUTHORIZED)
@@ -148,7 +149,7 @@ class OperationView(APIView):
         serializer.data["image"] = image
         return Response({'data':serializer.data, "image":image})
     
-    @auth_classes_decorator([SessionAuthentication, BasicAuthentication])
+    #@auth_classes_decorator([SessionAuthentication, BasicAuthentication])
     @method_permission_classes((IsManager,))
     @swagger_auto_schema(request_body=OperationSerializer)
     def put(self, request,id):
@@ -174,7 +175,7 @@ class OperationView(APIView):
             serializer.save()
             return_data = python_requests.get('http://'+HOST+PORT+'operation/{id_}/'.format (id_ = id))
             return Response(status=200, data = return_data.json())
-    @auth_classes_decorator([SessionAuthentication, BasicAuthentication])
+    #@auth_classes_decorator([SessionAuthentication, BasicAuthentication])
     @method_permission_classes((IsManager,))
     def delete(self, request, id):
         '''

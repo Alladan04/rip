@@ -12,10 +12,10 @@ def DateFilter(objects, request):
     lowerdate = "2020-01-01"
     higherdate = "2500-01-01"
     if request.query_params.get('downdate'):
-        lowerdate = datetime.strptime(request.query_params.get('downdate'), '%Y-%m-%d|%H:%M:%S')
+        lowerdate = datetime.strptime(request.query_params.get('downdate'), '%Y-%m-%dT%H:%M')
     if request.query_params.get('update'):
-        higherdate = datetime.strptime(request.query_params.get('update'), '%Y-%m-%d|%H:%M:%S')
-    return objects.filter(creation_date__gte = lowerdate, creation_date__lte = higherdate)
+        higherdate = datetime.strptime(request.query_params.get('update'), '%Y-%m-%dT%H:%M')
+    return objects.filter(form_date__gte = lowerdate, form_date__lte = higherdate)
 
 def StatusFilter(objects, request, user:UserProfile):
      try:
@@ -32,7 +32,15 @@ def StatusFilter(objects, request, user:UserProfile):
          return (objects.filter( user = user, status__in = status_list) )
      return (objects.filter( status__in = status_list) )
     
-
+def NameFilter(objects, request, user: UserProfile):
+    try:
+        name = request.query_params['username']
+    except:
+        name = ""
+    nums = []
+    for item in UserProfile.objects.filter(username__icontains = name):
+        nums.append(item.id)
+    return (objects.filter(user__in = nums))
 
 def RequestFilter(objects, request, user):
-    return DateFilter(StatusFilter(objects,request, user),request)
+    return DateFilter(NameFilter(StatusFilter(objects,request, user), request, user),request)

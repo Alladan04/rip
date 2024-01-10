@@ -11,18 +11,21 @@ from rest_framework.response import Response
 from rest_framework import authentication, permissions as rest_permissions
 from myproject.permissions import *
 from myproject.settings import REDIS_HOST, REDIS_PORT
+from .conf import BASE_IMG
 import redis
 import datetime
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes
 from  rest_framework.exceptions import bad_request
 import requests as python_requests
 import json
 from rest_framework import status as r_status
 from .filters import RequestFilter
+from .OperationViews import getImage
 from drf_yasg.utils import swagger_auto_schema
 from .utils import get_us_id, operation_util
 import pytz
 from django.views.decorators.csrf import csrf_exempt
+import requests
 #session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 
 def get_adm_id():
@@ -30,7 +33,8 @@ def get_adm_id():
 def getUsername(id):
     return UserProfile.objects.get(id = id).username
 class RequestListView(APIView):
-    permission_classes=[rest_permissions.IsAuthenticated]
+    #permission_classes=[rest_permissions.IsAuthenticated]
+    @method_permission_classes([IsAuthenticated,])
     def get(self, request, format = None):
         '''по юзер_ид выдает список заявок, есть фильтрация по статусу заявки.
         фильтры устанавливаются в квери параметрах урла в виде
@@ -44,17 +48,20 @@ class RequestListView(APIView):
         requests = RequestFilter(Request.objects,request, user)
         try:
             serialized_list = [RequestSerializer(request).data for request in requests]
-            plus_user = [{"item":item, "user":"allochka"} for item in serialized_list]
+            #plus_user = [{"item":item, "user":"allochka"} for item in serialized_list]
             for item in serialized_list:
                 item["user"]= getUsername(item["user"])
+                if item["admin"]:
+                    item["admin"] = getUsername(item["admin"])
+                #item["admin"] = getUsername(item["admin"])
             #serialized_list = [request["username"] = getUsername(request["user_id"]) for request in serialized_list]
             return Response(data= {'data':serialized_list})
         except:
             return Response( status = 400, data = "Bad Request")
    
 class RequestView(APIView):
-    permission_classes = [rest_permissions.IsAuthenticated]
-     
+   # permission_classes = [rest_permissions.IsAuthenticated]
+    @method_permission_classes([IsAuthenticated,]) 
     def get (self, request,id):
         ''' 
         Просмотр одной заявки, доступно только авторизованным пользователям
@@ -83,11 +90,17 @@ class RequestView(APIView):
         try:
             serialized_opreq = [OperationRequestSerializer(opreq).data for opreq in opreqs]
             for i in serialized_opreq:
+                url= "http://127.0.0.1:8000/operation/"+str(i['operation'])
                 i['operation'] = OperationSerializer(Operation.objects.get(id = i['operation'])).data
-            serialized_request= RequestSerializer(ob_request[0]).data
+                if (i['operation']['img']!=None):
+                    i['operation']['image'] = getImage(i['operation']['img'])
+                else:
+                    i['operation']['image'] = getImage(BASE_IMG)
+            serialized_request= RequestSerializer(ob_request).data
             return Response(data = {'data':{'request':serialized_request, 'items':serialized_opreq}})#'operations':serialized_operations}})
         except:
             return Response(status=400, data = "Bad Request. Probably the request you are referring to does not exist") 
+    @method_permission_classes([IsAuthenticated,])
     def delete(self,request,id):
         '''
         Удалить заявку, доступно только авторизованным пользователям.
@@ -135,15 +148,17 @@ class RequestView(APIView):
     
 
 
-@swagger_auto_schema(method='put', request_body= RequestSerializer)   
+@swagger_auto_schema(method='put', request_body= RequestSerializer)  
 @api_view(['Put'])
+@permission_classes([IsAuthenticated])
+#@method_permission_classes([IsAuthenticated,]) 
 def form(request, id):
     user_id = get_us_id(request=request)
     #тут менять по ИД заявки
     try:
         req = Request.objects.filter(id = id, user = user_id, status = 'введён')[0]
     except:
-        return Response(status = r_status.HTTP_403_FORBIDDEN, data = 'Something got wrong')
+        return Response(status = r_status.HTTP_400_BAD_REQUEST, data = 'Something got wrong')
     req.status = 'в работе'
     req.form_date = datetime.datetime.now(tz=pytz.UTC)
     req.save()

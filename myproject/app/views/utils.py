@@ -4,10 +4,16 @@ from rest_framework import status
 from myproject.settings import REDIS_HOST, REDIS_PORT
 import redis
 session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+def get_session(request):
+    ssid = request.COOKIES.get("session_id")
+
+    if ssid is None:
+        ssid = request.headers.get("authorization")
+    return ssid
 
 def get_us_id(request):
         try:
-            ssid = request.COOKIES["session_id"]
+            ssid = get_session(request)#request.COOKIES["session_id"]
         except:
             return None#Response(status=status.HTTP_403_FORBIDDEN)
 

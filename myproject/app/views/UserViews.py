@@ -8,6 +8,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework import permissions
 from ..models import UserProfile
+from .utils import get_session
 from ..serializers import UserSerializer
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
@@ -70,12 +71,13 @@ class UserViewSet(viewsets.ModelViewSet):
                                      is_superuser=serializer.data['is_superuser'],
                                      is_staff=serializer.data['is_staff'])
             return Response({'status': 'Success'}, status=200)
-        return Response( status=status.HTTP_400_BAD_REQUEST)
+        return Response(data= serializer._errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def check_auth(request):
-    session_id = request.COOKIES["session_id"]#request.headers.get("authorization")
+    #session_id = request.COOKIES["session_id"]#request.headers.get("authorization")
+    session_id = get_session(request=request)
     print(session_id)
 
     print(session_storage.get(session_id))
@@ -124,14 +126,14 @@ def login_view(request):
 
 
 
-@csrf_exempt
+#@csrf_exempt
 @swagger_auto_schema(method='post')
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def logout_view(request):
     try:
-       #ssid = request.headers.get("authorization")
-       ssid = request.COOKIES["session_id"]
+       ssid = get_session(request=request) #request.headers.get("authorization")
+       #ssid = request.COOKIES["session_id"]
        print(ssid)
     except:
         return Response(data = 'logout failed',status = status.HTTP_403_FORBIDDEN)#HttpResponse("{'status': 'error', 'error': 'logout failed'}")
