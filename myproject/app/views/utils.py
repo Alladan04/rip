@@ -27,7 +27,7 @@ def operation_util( req: Request):
             a = 0
         if (b== None):
             b = 0
-        match i.operation.id:
+        match i.operation.id%6:
             case 1:
                 i.result = a|b
             case 2:
@@ -40,5 +40,6 @@ def operation_util( req: Request):
                 i.result = ~(a&b)
             case 6:
                 i.result = ~a
+            
         i.save()
     return req

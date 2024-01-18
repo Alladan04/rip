@@ -37,13 +37,13 @@ class UserProfile(AbstractBaseUser,PermissionsMixin):
 
 
 class Operation(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True,auto_created=True )
     name = models.CharField(max_length=30, blank=True, null=True)
     status = models.CharField(max_length =30, blank=True, null=True)  # This field type is a guess.
     type = models.CharField(max_length = 30, blank=True, null=True)  # This field type is a guess.
     price = models.FloatField(blank=True, null=True)  # This field type is a guess.
     description = models.TextField(blank=True, null=True)
-    img=models.CharField(max_length=30, blank = True, null = True) #models.ImageField(upload_to='uploads/')   
+    img=models.CharField(max_length=100, blank = True, null = True) #models.ImageField(upload_to='uploads/')   
 
     class Meta:
         managed = True

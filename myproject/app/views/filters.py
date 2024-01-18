@@ -12,9 +12,9 @@ def DateFilter(objects, request):
     lowerdate = "2020-01-01"
     higherdate = "2500-01-01"
     if request.query_params.get('downdate'):
-        lowerdate = datetime.strptime(request.query_params.get('downdate'), '%Y-%m-%dT%H:%M')
+        lowerdate = datetime.strptime(request.query_params.get('downdate'), '%Y-%m-%d')
     if request.query_params.get('update'):
-        higherdate = datetime.strptime(request.query_params.get('update'), '%Y-%m-%dT%H:%M')
+        higherdate = datetime.strptime(request.query_params.get('update'), '%Y-%m-%d')
     return objects.filter(form_date__gte = lowerdate, form_date__lte = higherdate)
 
 def StatusFilter(objects, request, user:UserProfile):

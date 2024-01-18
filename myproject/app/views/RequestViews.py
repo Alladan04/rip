@@ -78,6 +78,7 @@ class RequestView(APIView):
             ob_request = Request.objects.filter(id = id, user = user)
             if ob_request.exists():
                 opreqs = OperationRequest.objects.filter(request = ob_request[0])
+                ob_request = ob_request[0]
             else:
                 return Response(status = r_status.HTTP_404_NOT_FOUND)
         else:    
@@ -109,7 +110,9 @@ class RequestView(APIView):
         если подали ИД который не существует, возвращает бэд реквест'''
         try:
             user_id = get_us_id(request=request) #get_us_id()
+            req =  Request.objects.filter(id =id)[0]
             ob_request = Request.objects.filter(id =id, user = user_id)[0]
+            
             ob_request.status = 'удалён'
             ob_request.finish_date = datetime.datetime.now(tz=pytz.UTC)
             ob_request.save()

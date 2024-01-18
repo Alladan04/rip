@@ -50,7 +50,12 @@ def postImage(request:Request,img_name:str ):
 def putImage(request:Request, img_name:str):
     minio = MinioClass()
     minio.removeImage(buck_name=BUCKET, object_name=img_name)
-    minio.addImage(buck_name=BUCKET, image_base64=request.data['image'], object_name=img_name)
+    try:
+        # file= request.FILES.get('image')
+         file = request.data['image'].replace(' ', '+')
+    except: 
+         file = request.data['image']
+    minio.addImage(buck_name=BUCKET, image_base64=file, object_name=img_name)
    
 class OperationListView(APIView):
    # authentication_classes=[SessionAuthentication, BasicAuthentication]
@@ -86,7 +91,7 @@ class OperationListView(APIView):
     @swagger_auto_schema(request_body=OperationSerializer)
     def post(self, request):
                 '''Добавление новой услуги в список услуг, доступно только модераторам'''
-                if Operation.objects.filter(id = request.data['pk']).exists():
+                if Operation.objects.filter(id = request.POST.get('pk')).exists():
                      return Response(status= r_status.HTTP_400_BAD_REQUEST, data = "Exists")
                 serializer = OperationSerializer(data = request.data)
                 keys = request.data.keys()
@@ -100,6 +105,8 @@ class OperationListView(APIView):
                 #    return Response(status =r_status.HTTP_400_BAD_REQUEST )
                 if serializer.is_valid():
                      serializer.save()
+                else:
+                     return Response(status = r_status.HTTP_400_BAD_REQUEST, data = serializer._errors)
                 return_data = serializer.data
             #if no name is attached then generate new name OR return an error (2-ND VARIANT MAY BE BETTER)
                 #return_data = python_requests.get('http://'+HOST+PORT+'operation/', cookies=[{"session_id": ssid}])
