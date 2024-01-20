@@ -5,7 +5,7 @@ import psycopg2
 from datetime import date
 from django.http import UnreadablePostError
 import pytz
-from ..serializers import OperationSerializer, RequestSerializer
+from ..serializers import OperationSerializer, RequestSerializer, OperationRequestSerializer
 from ..models import Operation,OperationRequest,Request, UserProfile
 from .utils import get_session
 from rest_framework.views import APIView
@@ -137,12 +137,16 @@ class OperationView(APIView):
             req = Request.objects.create(user= UserProfile.objects.get(id = user_id), status = "введён",creation_date =datetime.datetime.now(tz=pytz.UTC))
         #try:
         OperationRequest.objects.create(operation = Operation.objects.get(id= id), request = req)
-        #return_data = OperationSerializer(Operation.objects.all(), many = True)
-        #except:
-         #   return Response(status=r_status.HTTP_404_NOT_FOUND, data = 'the operation you are referring to does not exist')
-        # сохранить новый оперэйшн-реквест в нашу бд   '''
-       # data = python_requests.get('http://'+HOST+PORT+'request/{id}'.format(id = req.id),  headers = {'Authorization': 'Bearer {}'.format(ssid)})
-        return redirect('http://'+HOST+PORT+'request/{id}'.format(id = req.id))#Response(status=200)
+       
+        items = [ OperationRequestSerializer(item).data for item in OperationRequest.objects.filter(request = req)]
+        for item in items:
+             item["operation"] = OperationSerializer(Operation.objects.get(id = item["operation"])).data
+             if (item['operation']['img']!=None):
+                    item['operation']['image'] = getImage(item['operation']['img'])
+             else:
+                    item['operation']['image'] = getImage(BASE_IMG)
+        
+        return Response(data = {'data':{'request':RequestSerializer(req).data, 'items':items}})#redirect('http://'+HOST+PORT+'request/{id}'.format(id = req.id))#Response(status=200)
     
        
      
