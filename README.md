@@ -2,8 +2,12 @@
  # Мои репозитории
 
 1. [Фронтенд](https://github.com/Alladan04/gp_frontend) 
-2. [Бэкенд](https://github.com/Alladan04/rip) 
-3. [Нативное приложение](https://github.com/Alladan04/react-native-app)
-4. [GitHub Pages](https://alladan04.github.io/gp_frontend/operation)
-5. Асинхронный сервис (автомат) 
+2. [Бэкенд](https://github.com/Alladan04/rip)
+         Л1: ssr
+         Л2: db
+         Л3: rest_api
+         Л5: auth
+4. [Нативное приложение](https://github.com/Alladan04/react-native-app)
+5. [GitHub Pages](https://alladan04.github.io/gp_frontend/operation)
+6. Асинхронный сервис (автомат) 
 
