@@ -5,5 +5,5 @@
 2. [Бэкенд](https://github.com/Alladan04/rip) 
 3. [Нативное приложение](https://github.com/Alladan04/react-native-app)
 4. [GitHub Pages](https://alladan04.github.io/gp_frontend/operation)
-5. [Асинхронный сервис](автомат) 
+5. Асинхронный сервис (автомат) 
 

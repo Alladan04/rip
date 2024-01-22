@@ -40,6 +40,11 @@ def operation_util( req: Request):
                 i.result = ~(a&b)
             case 6:
                 i.result = ~a
+        if (i.operation.name.lower() == 'дизъюнкция' or i.operation.name.lower() == 'или' ):
+            i.result = a|b
+        elif (i.operation.name.lower() == 'конъюнкция' or i.operation.name.lower() == 'и'):
+            i.result = a&b
+
             
         i.save()
     return req
