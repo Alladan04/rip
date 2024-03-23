@@ -2,7 +2,7 @@
  # Мои репозитории
 
 1. [Фронтенд](https://github.com/Alladan04/gp_frontend) 
-2. [Бэкенд](https://github.com/Alladan04/rip)
+2. [Бэкенд](https://github.com/Alladan04/rip/tree/back_for_front)
     - Л1. ssr (https://github.com/Alladan04/rip/tree/ssr)
     - Л2. db (https://github.com/Alladan04/rip/tree/db)
     - Л3. rest_api (https://github.com/Alladan04/rip/tree/rest_api)
